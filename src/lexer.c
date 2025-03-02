@@ -96,7 +96,7 @@ LexResult lex(const char *source, const int source_len)
     Token *p_token = stream;
 
     // initialize the lexer state.
-    const char *p_source = source, *p_token_begin;
+    const char *p_source = source, *p_token_begin = source;
     State state = S_scan;
     bool in_section = false;
     ErrorType err_type = E_unexpected_character;
