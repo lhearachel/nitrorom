@@ -116,9 +116,11 @@ int main(int argc, char **argv)
     const char *filename = argv[1];
     String source = fload(filename);
 
-    LexResult lex_result = lex(source.p, source.len);
-    if (!lex_result.ok) {
-        report_err(filename, source.p, &lex_result);
+    LexResult lexed = lex(source.p, source.len);
+    if (!lexed.ok) {
+        report_err(filename, source.p, &lexed);
         exit(EXIT_FAILURE);
     }
+
+    free(lexed.tokens);
 }

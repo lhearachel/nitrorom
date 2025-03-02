@@ -54,7 +54,7 @@ typedef enum {
 } TokenType;
 
 typedef enum {
-    E_unexpected_token = 0,
+    E_unexpected_character = 0,
     E_unknown_keyword,
     E_unterminated_string,
     E_invalid_filepath,

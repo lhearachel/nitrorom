@@ -99,7 +99,7 @@ LexResult lex(const char *source, const int source_len)
     const char *p_source = source, *p_token_begin;
     State state = S_scan;
     bool in_section = false;
-    ErrorType err_type = E_unexpected_token;
+    ErrorType err_type = E_unexpected_character;
 
     while (state > S_done) {
         int token_len = 0;
@@ -164,7 +164,7 @@ LexResult lex(const char *source, const int source_len)
             // revert to S_error if the mapping failed for whatever reason.
             state = ((p_token->type == T_error) * S_error)
                 + ((p_token->type != T_error) * (S_scan + in_section));
-            err_type = p_token->type == T_error ? E_unknown_keyword : E_unexpected_token;
+            err_type = p_token->type == T_error ? E_unknown_keyword : E_unexpected_character;
             break;
 
         case S_begin_section:
@@ -602,7 +602,7 @@ static const u8 transition[NUM_STATES][NUM_CLASSES] = {
 };
 
 char *error_messages[NUM_ERROR_TYPES] = {
-    [E_unexpected_token] = "unexpected token",
+    [E_unexpected_character] = "unexpected character",
     [E_unknown_keyword] = "unknown keyword",
     [E_unterminated_string] = "unterminated string",
     [E_invalid_filepath] = "invalid filepath",
