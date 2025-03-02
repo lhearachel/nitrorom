@@ -55,7 +55,8 @@ typedef enum {
 
 typedef enum {
     E_unexpected_character = 0,
-    E_unknown_keyword,
+    E_unknown_section_keyword,
+    E_unknown_section_title,
     E_unterminated_string,
     E_invalid_filepath,
 

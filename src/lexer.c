@@ -24,7 +24,8 @@ typedef enum {
     S_hexadec_num,   // hexadecimal-literals
     S_string,        // string-literals
     S_filepath,      // filepath-literals
-    S_keyword,       // keywords: section-titles, parameters, directives, and constants
+    S_section_title, // section-title keywords: Properties, ARM9, etc.
+    S_keyword,       // in-section keywords: parameters, directives, some consts
     S_begin_section, // begin a section
     S_close_section, // close a section
 
@@ -38,7 +39,8 @@ typedef enum {
     S_scan_section,      // whitespace inside a section
     S_eat_comment,       // eat all characters until the next '\n'
     S_eat_sect_comment,  // eat all characters until the next '\n'
-    S_eat_keyword,       // eat alpha-numerics as a token
+    S_eat_sect_title,    // eat alpha-numerics as a token
+    S_eat_sect_keyword,  // eat alpha-numerics as a token
     S_eat_digit,         // eat decimal-digits as a token
     S_eat_hexadec_digit, // eat hexadecimal-digits as a token
     S_saw_hex_leader,    // eat hexadecimal-digits as a token
@@ -84,7 +86,8 @@ static const u8 transition[NUM_STATES][NUM_CLASSES];
 #define is_hex_lower(ch) (ch >= 'a' && ch <= 'f')
 #define is_dec_digit(ch) (ch >= '0' && ch <= '9')
 
-static TokenType map_keyword(const char *token, int len);
+static TokenType map_section_title(const char *token, int len);
+static TokenType map_section_keyword(const char *token, int len);
 
 LexResult lex(const char *source, const int source_len)
 {
@@ -109,7 +112,7 @@ LexResult lex(const char *source, const int source_len)
             int ch = *p_source++;
             int class = char_class[ch];
             state = transition[state][class];
-            token_len += (state >= S_eat_keyword && state < NUM_STATES);
+            token_len += (state >= S_eat_sect_title && state < NUM_STATES);
         } while (state >= S_scan);
 
         // interpret the token.
@@ -156,15 +159,25 @@ LexResult lex(const char *source, const int source_len)
             state = S_scan + in_section;
             break;
 
+        case S_section_title:
+            p_token_begin = rewind_token();
+            p_token->type = map_section_title(p_token_begin, token_len);
+
+            // revert to S_error if the mapping failed for whatever reason.
+            state = ((p_token->type == T_error) * S_error)
+                + ((p_token->type != T_error) * (S_scan + in_section));
+            err_type = p_token->type == T_error ? E_unknown_section_title : E_unexpected_character;
+            break;
+
         case S_keyword:
             p_token_begin = rewind_token();
-            p_token->type = map_keyword(p_token_begin, token_len);
+            p_token->type = map_section_keyword(p_token_begin, token_len);
             p_token->b_value = (p_token->type == T_value_true); // false / empty otherwise
 
             // revert to S_error if the mapping failed for whatever reason.
             state = ((p_token->type == T_error) * S_error)
                 + ((p_token->type != T_error) * (S_scan + in_section));
-            err_type = p_token->type == T_error ? E_unknown_keyword : E_unexpected_character;
+            err_type = p_token->type == T_error ? E_unknown_section_keyword : E_unexpected_character;
             break;
 
         case S_begin_section:
@@ -224,22 +237,35 @@ LexResult lex(const char *source, const int source_len)
 // the keyword, which plays well with replacing branches with arithmetic.
 #define if_keyword_match(s, keyword, token_type) (token_type * (len == lengthof(keyword) && strncmp(s, keyword, len) == 0))
 
-static TokenType map_keyword(const char *token, int len)
+static TokenType map_section_title(const char *token, int len)
 {
     switch (*token) {
     case 'A':
         return if_keyword_match(token, "ARM9", T_title_arm9)
-            + if_keyword_match(token, "ARM7", T_title_arm7)
-            + if_keyword_match(token, "AddFile", T_direc_addfile);
+            + if_keyword_match(token, "ARM7", T_title_arm7);
+
+    case 'L':
+        return if_keyword_match(token, "Layout", T_title_layout);
+
+    case 'P':
+        return if_keyword_match(token, "Properties", T_title_properties);
+
+    default:
+        return T_error;
+    }
+}
+
+static TokenType map_section_keyword(const char *token, int len)
+{
+    switch (*token) {
+    case 'A':
+        return if_keyword_match(token, "AddFile", T_direc_addfile);
 
     case 'C':
         return if_keyword_match(token, "CodeBinary", T_param_codebinary);
 
     case 'D':
         return if_keyword_match(token, "Definitions", T_param_definitions);
-
-    case 'L':
-        return if_keyword_match(token, "Layout", T_title_layout);
 
     case 'M':
         return if_keyword_match(token, "MakerCode", T_param_makercode)
@@ -249,8 +275,7 @@ static TokenType map_keyword(const char *token, int len)
         return if_keyword_match(token, "OverlayTable", T_param_overlaytable);
 
     case 'P':
-        return if_keyword_match(token, "Properties", T_title_properties)
-            + if_keyword_match(token, "PadToEnd", T_param_padtoend)
+        return if_keyword_match(token, "PadToEnd", T_param_padtoend)
             + if_keyword_match(token, "PROM", T_value_PROM);
 
     case 'R':
@@ -382,9 +407,9 @@ static const u8 transition[NUM_STATES][NUM_CLASSES] = {
         [C_hash] = S_eat_comment, // eat a comment
 
         // start a keyword token.
-        [C_alphahex] = S_eat_keyword,
-        [C_alpha] = S_eat_keyword,
-        [C_x] = S_eat_keyword,
+        [C_alphahex] = S_eat_sect_title,
+        [C_alpha] = S_eat_sect_title,
+        [C_x] = S_eat_sect_title,
 
         // '{' starts a section and transfers to S_scan_section.
         [C_lbrace] = S_begin_section,
@@ -398,9 +423,9 @@ static const u8 transition[NUM_STATES][NUM_CLASSES] = {
 
         // start a keyword token. this may be a parameter keyword or a
         // reserved constant: "MROM", "PROM", "true", "false".
-        [C_alphahex] = S_eat_keyword,
-        [C_alpha] = S_eat_keyword,
-        [C_x] = S_eat_keyword,
+        [C_alphahex] = S_eat_sect_keyword,
+        [C_alpha] = S_eat_sect_keyword,
+        [C_x] = S_eat_sect_keyword,
 
         // eat numerals as a numeric-literal. a leading '0' may denote either a
         // decimal- or hexadecimal-literal; any other digit must be in decimal.
@@ -475,18 +500,32 @@ static const u8 transition[NUM_STATES][NUM_CLASSES] = {
     // whether the keyword comes from the outside or inside of a section. the
     // aspect of flipping from S_keyword to S_scan vs S_scan_section is left to
     // the terminal-state processor.
-    [S_eat_keyword] = {
+    [S_eat_sect_title] = {
+        // STOP; interpret the token
+        [C_space] = S_section_title,
+        [C_lf] = S_section_title,
+        [C_lbrace] = S_section_title, // and also begin the section
+
+        // continue the token.
+        [C_alphahex] = S_eat_sect_title,
+        [C_alpha] = S_eat_sect_title,
+        [C_x] = S_eat_sect_title,
+        [C_digit] = S_eat_sect_title,
+        [C_zero] = S_eat_sect_title,
+    },
+
+    [S_eat_sect_keyword] = {
         // STOP; interpret the token
         [C_space] = S_keyword,
-        [C_lf] = S_keyword,
+        [C_lf] = S_keyword,     // some buck-passing here to the parser
         [C_lbrace] = S_keyword, // and also begin the section
 
         // continue the token.
-        [C_alphahex] = S_eat_keyword,
-        [C_alpha] = S_eat_keyword,
-        [C_x] = S_eat_keyword,
-        [C_digit] = S_eat_keyword,
-        [C_zero] = S_eat_keyword,
+        [C_alphahex] = S_eat_sect_keyword,
+        [C_alpha] = S_eat_sect_keyword,
+        [C_x] = S_eat_sect_keyword,
+        [C_digit] = S_eat_sect_keyword,
+        [C_zero] = S_eat_sect_keyword,
     },
 
     // must be a decimal-literal. spaces and line-feeds terminate.
@@ -603,7 +642,8 @@ static const u8 transition[NUM_STATES][NUM_CLASSES] = {
 
 char *error_messages[NUM_ERROR_TYPES] = {
     [E_unexpected_character] = "unexpected character",
-    [E_unknown_keyword] = "unknown keyword",
+    [E_unknown_section_title] = "unknown section title",
+    [E_unknown_section_keyword] = "unknown section keyword",
     [E_unterminated_string] = "unterminated string",
     [E_invalid_filepath] = "invalid filepath",
 };
