@@ -1,0 +1,15 @@
+# Compiler Artifacts
+*.o
+*.d
+
+# Executables
+*.exe
+ndsmake
+
+# LSP / IDE integrations
+compile_commands.json
+.cache/
+.vscode/
+
+# Temporary file ignores...
+*.back
