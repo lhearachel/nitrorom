@@ -8,7 +8,7 @@
 
 .PHONY: all tidy clean
 
-CFLAGS += -MMD -std=c11 -g3 -O0
+CFLAGS += -MMD -std=c11 -g3 -Og
 CFLAGS += -Wall -Wextra
 CFLAGS += -Iinclude
 CFLAGS += -include global.h
