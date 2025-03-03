@@ -42,6 +42,8 @@ typedef uint32_t  bool;
 
 #define assert(c)                while (!(c)) __builtin_unreachable()
 #define static_assert(c, ...)    _Static_assert(c, ##__VA_ARGS__)
+
+#define min(a, b) ((((a) <= (b)) * (a)) + (((a) > (b)) * (b)))
 // clang-format on
 
 #endif // GLOBAL_H

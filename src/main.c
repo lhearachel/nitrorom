@@ -12,6 +12,7 @@
 #include <stdlib.h>
 
 #include "lexer.h"
+#include "parser.h"
 
 typedef struct {
     char *p;
@@ -49,7 +50,7 @@ static String fload(const char *filename)
     };
 }
 
-static void report_err(const char *filename, const char *source, LexResult *result)
+static void report_lex_err(const char *filename, const char *source, LexResult *result)
 {
     const char *p_line = source;
     int line_num = 0;
@@ -118,9 +119,42 @@ int main(int argc, char **argv)
 
     LexResult lexed = lex(source.p, source.len);
     if (!lexed.ok) {
-        report_err(filename, source.p, &lexed);
+        report_lex_err(filename, source.p, &lexed);
+        exit(EXIT_FAILURE);
+    }
+
+    ParseResult parsed = parse(lexed.tokens, lexed.len, source.p);
+    if (!parsed.ok) {
+        fprintf(stderr, "parse-error... get debugging!\n");
+        free(lexed.tokens);
+        free(source.p);
         exit(EXIT_FAILURE);
     }
 
     free(lexed.tokens);
+    free(source.p);
+
+    ROMSpec *romspec = parsed.spec;
+    printf("== Properties ==\n");
+    printf("  - Title:        “%.*s”\n", LEN_TITLE, romspec->properties.title);
+    printf("  - Serial:       “%.*s”\n", LEN_SERIAL, romspec->properties.serial);
+    printf("  - Maker:        “%.*s”\n", LEN_MAKER, romspec->properties.maker);
+    printf("  - Revision:     %u\n", romspec->properties.revision);
+    printf("  - Pad to end?   %s\n", romspec->properties.pad_to_end ? "yes" : "no");
+    printf("  - ROM type      %s\n", romspec->properties.rom_type == 0x051E ? "MROM" : "PROM");
+    printf("  - ROM capacity: 0x%08X\n", romspec->properties.capacity);
+    printf("== ARM9 ==\n");
+    printf("  - Code Binary:   %s\n", romspec->arm9.code_binary_fpath);
+    printf("  - Definitions:   %s\n", romspec->arm9.definitions_fpath);
+    printf("  - Overlay Table: %s\n", romspec->arm9.overlay_table_fpath);
+    printf("== ARM7 ==\n");
+    printf("  - Code Binary:   %s\n", romspec->arm7.code_binary_fpath);
+    printf("  - Definitions:   %s\n", romspec->arm7.definitions_fpath);
+    printf("  - Overlay Table: %s\n", romspec->arm7.overlay_table_fpath);
+    printf("== Filesys Layout ==\n");
+    for (u32 i = 0; i < romspec->len_files; i++) {
+        printf("  %s -> %s\n", romspec->files[i].target_path, romspec->files[i].source_path);
+    }
+
+    dspec(parsed.spec);
 }
