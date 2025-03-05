@@ -65,18 +65,12 @@ typedef enum {
 
 typedef struct {
     TokenType type;
+    int begin; // All tokens know their position in the source file for richer
+    int len;   // error-reports.
 
     union {
         bool b_value;
         u32 n_value;
-
-        // strings, filepaths, and constants are returned as content-ranges
-        // rather than performing an allocation and copy mid-lex. pass the buck
-        // on that to the parser.
-        struct {
-            int begin;
-            int len;
-        } s_value;
     };
 } Token;
 

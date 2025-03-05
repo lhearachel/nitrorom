@@ -142,15 +142,15 @@ static const u8 transition[NUM_SECTION_STATES][NUM_TOKEN_TYPES];
 
 #define take_string(dest, max_len)                                            \
     {                                                                         \
-        tmp = min((u32)p_value->s_value.len, max_len);                        \
-        strncpy(dest, source + p_value->s_value.begin, tmp);                  \
+        tmp = min((u32)p_value->len, max_len);                                \
+        strncpy(dest, source + p_value->begin, tmp);                          \
         error = p_value->type != T_value_string ? E_expected_string : E_none; \
     }
 #define take_filepath(dest)                                                                                            \
     {                                                                                                                  \
-        tmp = min((u32)p_value->s_value.len, LEN_FILEPATH);                                                            \
+        tmp = min((u32)p_value->len, LEN_FILEPATH);                                                                    \
         memset(dest, 0, LEN_FILEPATH);                                                                                 \
-        strncpy(dest, source + p_value->s_value.begin, tmp);                                                           \
+        strncpy(dest, source + p_value->begin, tmp);                                                                   \
         error = (p_value->type != T_value_filepath && p_value->type != T_value_string) ? E_expected_filepath : E_none; \
     }
 #define take_number(dest)                                                     \

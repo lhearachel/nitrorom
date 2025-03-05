@@ -121,6 +121,9 @@ LexResult lex(const char *source, const int source_len)
             p_token_begin = rewind_token();
             p_token->type = T_value_number;
             p_token->n_value = 0;
+            p_token->begin = p_token_begin - source;
+            p_token->len = token_len;
+
             for (int i = 0; i < token_len; i++) {
                 char ch = *(p_token_begin + i);
                 p_token->n_value *= 10;
@@ -133,6 +136,9 @@ LexResult lex(const char *source, const int source_len)
             p_token_begin = rewind_token();
             p_token->type = T_value_number;
             p_token->n_value = 0;
+            p_token->begin = p_token_begin - source;
+            p_token->len = token_len;
+
             for (int i = 2; i < token_len; i++) { // skip the leading "0x"
                 char ch = *(p_token_begin + i);
                 p_token->n_value *= 0x10;
@@ -146,22 +152,24 @@ LexResult lex(const char *source, const int source_len)
         case S_string:
             p_token_begin = rewind_token() + 1; // first character is '"'
             p_token->type = T_value_string;
-            p_token->s_value.begin = p_token_begin - source;
-            p_token->s_value.len = token_len - 1; // first character is '"'
+            p_token->begin = p_token_begin - source;
+            p_token->len = token_len - 1; // first character is '"'
             state = S_scan + in_section;
             break;
 
         case S_filepath:
             p_token_begin = rewind_token();
             p_token->type = T_value_filepath;
-            p_token->s_value.begin = p_token_begin - source;
-            p_token->s_value.len = token_len;
+            p_token->begin = p_token_begin - source;
+            p_token->len = token_len;
             state = S_scan + in_section;
             break;
 
         case S_section_title:
             p_token_begin = rewind_token();
             p_token->type = map_section_title(p_token_begin, token_len);
+            p_token->begin = p_token_begin - source;
+            p_token->len = token_len;
 
             // revert to S_error if the mapping failed for whatever reason.
             state = ((p_token->type == T_error) * S_error)
@@ -173,6 +181,8 @@ LexResult lex(const char *source, const int source_len)
             p_token_begin = rewind_token();
             p_token->type = map_section_keyword(p_token_begin, token_len);
             p_token->b_value = (p_token->type == T_value_true); // false / empty otherwise
+            p_token->begin = p_token_begin - source;
+            p_token->len = token_len;
 
             // revert to S_error if the mapping failed for whatever reason.
             state = ((p_token->type == T_error) * S_error)
@@ -182,12 +192,16 @@ LexResult lex(const char *source, const int source_len)
 
         case S_begin_section:
             p_token->type = T_section_begin;
+            p_token->begin = p_token_begin - source;
+            p_token->len = token_len;
             state = S_scan_section;
             in_section = true;
             break;
 
         case S_close_section:
             p_token->type = T_section_end;
+            p_token->begin = p_token_begin - source;
+            p_token->len = token_len;
             state = S_scan;
             in_section = false;
             break;
