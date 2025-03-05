@@ -654,7 +654,7 @@ static const u8 transition[NUM_STATES][NUM_CLASSES] = {
     },
 };
 
-char *error_messages[NUM_ERROR_TYPES] = {
+const char *lex_error_messages[NUM_ERROR_TYPES] = {
     [E_unexpected_character] = "unexpected character",
     [E_unknown_section_title] = "unknown section title",
     [E_unknown_section_keyword] = "unknown section keyword",
@@ -663,7 +663,7 @@ char *error_messages[NUM_ERROR_TYPES] = {
 };
 
 #ifndef NDEBUG
-char *token_names[NUM_TOKEN_TYPES] = {
+const char *token_names[NUM_TOKEN_TYPES] = {
     [T_error] = "T_error",
     [T_section_begin] = "T_section_begin",
     [T_section_end] = "T_section_end",

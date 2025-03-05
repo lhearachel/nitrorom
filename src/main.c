@@ -119,7 +119,15 @@ static void report_lex_err(const char *filename, const char *source, LexResult *
     err.sub_len += (result->err_type == E_invalid_filepath);
     err.post_len -= (result->err_type == E_invalid_filepath);
 
-    report_err(filename, error_messages[result->err_type], source + result->err_begin, err);
+    report_err(filename, lex_error_messages[result->err_type], source + result->err_begin, err);
+}
+
+static void report_parse_err(const char *filename, const char *source, ParseResult *parsed, LexResult *lexed)
+{
+    Token *bad_token = lexed->tokens + parsed->err_idx;
+    ErrorCoord err = find_err(source, bad_token->begin, bad_token->begin + bad_token->len);
+
+    report_err(filename, parse_error_messages[parsed->err_type], source + bad_token->begin, err);
 }
 
 int main(int argc, char **argv)
@@ -139,7 +147,7 @@ int main(int argc, char **argv)
 
     ParseResult parsed = parse(lexed.tokens, lexed.len, source.p);
     if (!parsed.ok) {
-        fprintf(stderr, "parse-error... get debugging!\n");
+        report_parse_err(filename, source.p, &parsed, &lexed);
         free(lexed.tokens);
         free(source.p);
         exit(EXIT_FAILURE);

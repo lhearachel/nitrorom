@@ -93,10 +93,10 @@ typedef struct {
 
 LexResult lex(const char *source, const int source_len);
 
-extern char *error_messages[NUM_ERROR_TYPES];
+extern const char *lex_error_messages[NUM_ERROR_TYPES];
 
 #ifndef NDEBUG
-extern char *token_names[NUM_TOKEN_TYPES];
+extern const char *token_names[NUM_TOKEN_TYPES];
 #endif // NDEBUG
 
 #endif // LEXER_H

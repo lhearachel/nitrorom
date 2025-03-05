@@ -65,4 +65,6 @@ typedef struct {
 ParseResult parse(Token *tokens, int num_tokens, const char *source);
 void dspec(ROMSpec *spec);
 
+extern const char *parse_error_messages[];
+
 #endif // PARSER_H

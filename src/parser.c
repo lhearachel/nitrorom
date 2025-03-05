@@ -496,3 +496,14 @@ static const u8 transition[NUM_SECTION_STATES][NUM_TOKEN_TYPES] = {
         [T_param_overlaytable] = E_invalid_section_param,
     },
 };
+
+const char *parse_error_messages[] = {
+    [E_invalid_section_param] = "invalid section-parameter",
+    [E_missing_value] = "missing value for parameter",
+    [E_expected_boolean] = "expected boolean-type value",
+    [E_expected_number] = "expected number-type value",
+    [E_expected_string] = "expected string-type value",
+    [E_expected_filepath] = "expected filepath- or string-type value",
+    [E_expected_romtype] = "expected romtype-type value",
+    [E_reallocation_error] = "fatal error reallocating files",
+};
