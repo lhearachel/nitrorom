@@ -212,7 +212,7 @@ ParseResult parse(Token *tokens, int num_tokens, const char *source)
         if (p_value->type < T_value_PROM) {
             // Sanity check for a missing value.
             error = E_missing_value;
-            tmp = i;
+            tmp = i - 1;
             break;
         }
 

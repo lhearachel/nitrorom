@@ -21,10 +21,10 @@ typedef struct {
 
 typedef struct {
     const char *p_line;
-    int line_len;
     int line_num;
-    int line_err_begin;
-    int line_err_end;
+    int pre_len;
+    int sub_len;
+    int post_len;
 } ErrorCoord;
 
 static String fload(const char *filename)
@@ -50,62 +50,76 @@ static String fload(const char *filename)
     };
 }
 
-static void report_lex_err(const char *filename, const char *source, LexResult *result)
+static ErrorCoord find_err(const char *source, int err_begin, int err_end)
 {
-    const char *p_line = source;
-    int line_num = 0;
-    int err_pre_len = 0;
-    int err_len = 0;
-    int err_post_len = 0;
+    ErrorCoord err = {
+        .p_line = source,
+        .line_num = 0,
+        .pre_len = 0,
+        .sub_len = 0,
+        .post_len = 0,
+    };
 
     int i;
-    for (i = 0; i < result->err_begin; i++) {
+    for (i = 0; i < err_begin; i++) {
         if (source[i] == '\n') {
-            p_line = source + i + 1;
-            line_num++;
-            err_pre_len = 0;
+            err.p_line = source + i + 1;
+            err.line_num++;
+            err.pre_len = 0;
         } else {
-            err_pre_len++;
+            err.pre_len++;
         }
     }
 
     do {
-        err_len++;
+        err.sub_len++;
         i++;
-    } while (i < result->err_end);
+    } while (i < err_end);
 
     while (source[i++] != '\n') {
-        err_post_len++;
+        err.post_len++;
     }
 
-    // bump the error length by 1 character for invalid filepaths, so that we highlight
-    // the invalid token at the end.
-    err_len += (result->err_type == E_invalid_filepath);
-    err_post_len -= (result->err_type == E_invalid_filepath);
+    return err;
+}
 
+static void report_err(const char *filename, const char *err_msg, const char *err_substr, ErrorCoord err)
+{
     //               BOLD[file:line:char]    BOLD_RED[error:]        error message        BOLD_RED[token]
     fprintf(stderr, "\x1B[1m%s:%d:%d:\x1B[0m \x1B[1;31merror:\x1B[0m %s: \x1B[1;31m“%.*s”\x1B[0m\n",
-            filename, line_num, err_pre_len + 1,
-            error_messages[result->err_type],
-            err_len, source + result->err_begin);
+            filename, err.line_num, err.pre_len + 1,
+            err_msg,
+            err.sub_len, err_substr);
 
     //               line_num | BOLD[line_to_err]BOLD_RED[err]BOLD[line_from_err]
     fprintf(stderr, "%5d | \x1B[1m%.*s\x1B[1;31m%.*s\x1B[0m\x1B[1m%.*s\x1B[0m\n",
-            line_num,
-            err_pre_len, p_line,
-            err_len, p_line + err_pre_len,
-            err_post_len, p_line + err_pre_len + err_len);
+            err.line_num,
+            err.pre_len, err.p_line,
+            err.sub_len, err.p_line + err.pre_len,
+            err.post_len, err.p_line + err.pre_len + err.sub_len);
 
     // red squiggle under the error span
     fprintf(stderr, "      | ");
-    for (int i = 0; i < err_pre_len; i++) {
+    for (int i = 0; i < err.pre_len; i++) {
         fputc(' ', stderr);
     }
     fputs("\x1B[1;31m", stderr);
-    for (int i = 0; i < err_len - 1; i++) {
+    for (int i = 0; i < err.sub_len - 1; i++) {
         fputc('~', stderr);
     }
     fprintf(stderr, "^\x1B[0m\n");
+}
+
+static void report_lex_err(const char *filename, const char *source, LexResult *result)
+{
+    ErrorCoord err = find_err(source, result->err_begin, result->err_end);
+
+    // bump the error length by 1 character for invalid filepaths, so that we highlight
+    // the invalid token at the end.
+    err.sub_len += (result->err_type == E_invalid_filepath);
+    err.post_len -= (result->err_type == E_invalid_filepath);
+
+    report_err(filename, error_messages[result->err_type], source + result->err_begin, err);
 }
 
 int main(int argc, char **argv)
