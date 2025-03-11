@@ -1,0 +1,529 @@
+# This is a comment. All text from the '#' to the end of the line is ignored.
+# A section begins with an open-brace ('{') and ends with a closing-brace ('}').
+Properties {
+    # Parameters for a given section are listed one-per-line and are separated
+    # from their associated value by a non-zero amount of inline whitespace.
+    Title       "POKEMON PL" # String-literals are wrapped in double-quotes.
+    Serial      "CPUE"
+    MakerCode   "01"
+    PadToEnd    false        # "true" and "false" are evaluated as booleans.
+    Revision    0            # Number-literals can be in decimal format...
+    ROMCapacity 0x08000000   # or hexadecimal by prefixing "0x".
+    ROMType     PROM         # Some fields use special string-keys.
+}
+
+# Open-braces for sections can also be broken to the next line.
+ARM9
+{
+    # Filepath-literals begin with '.' or '/'. Characters which are normally
+    # restricted on Windows filesystems are considered invalid. All path-
+    # separators must be Unix-style ('/'), and any whitespace character will
+    # terminate the literal. If a filepath must contain spaces, then it must be
+    # written as a string-literal.
+    CodeBinary   ./main.sbin
+    Definitions  ./main_defs.sbin
+    OverlayTable ./main_table.sbin
+}
+
+ARM7
+{
+    CodeBinary  ./sub.sbin
+    Definitions ./sub_defs.sbin
+}
+
+Layout {
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+
+    AddFile "data/UTF16.dat"
+    AddFile "data/arealight.narc"
+    AddFile "data/battle_win.NSCR"
+    AddFile "data/btower_canm.resdat"
+    AddFile "data/btower_celact.cldat"
+    AddFile "data/btower_cell.resdat"
+    AddFile "data/btower_chr.resdat"
+    AddFile "data/btower_pal.resdat"
+    AddFile "data/cell0.NCGR"
+    AddFile "data/cell0.NCLR"
+    AddFile "data/clact_default.NANR"
+    AddFile "data/crystal.nsbmd"
+    AddFile "data/demo_climax.narc"
+    AddFile "data/dp_areawindow.NCGR"
+    AddFile "data/dp_areawindow.NCLR"
+    AddFile "data/dt_test_celact.txt"
+    AddFile "data/dt_test_res_cell.txt"
+    AddFile "data/dt_test_res_cellanm.txt"
+    AddFile "data/dt_test_res_char.txt"
+    AddFile "data/dt_test_res_multi.txt"
+    AddFile "data/dt_test_res_multianm.txt"
+    AddFile "data/dt_test_res_pltt.txt"
+    AddFile "data/dun_sea.nsbtx"
+    AddFile "data/eoo.dat"
+    AddFile "data/exdata.dat"
+    AddFile "data/field_cutin.narc"
+    AddFile "data/fld_anime0.bin"
+    AddFile "data/fld_anime1.bin"
+    AddFile "data/fld_anime10.bin"
+    AddFile "data/fld_anime2.bin"
+    AddFile "data/fld_anime3.bin"
+    AddFile "data/fld_anime4.bin"
+    AddFile "data/fld_anime5.bin"
+    AddFile "data/fld_anime6.bin"
+    AddFile "data/fld_anime7.bin"
+    AddFile "data/fld_anime8.bin"
+    AddFile "data/fld_anime9.bin"
+    AddFile "data/fldtanime.narc"
+    AddFile "data/fs_kanban.nsbca"
+    AddFile "data/ground0.NCGR"
+    AddFile "data/ground0.NCLR"
+    AddFile "data/ground0.NSCR"
+    AddFile "data/guru2.narc"
+    AddFile "data/kemu_itpconv.dat"
+    AddFile "data/lake_anim.nsbtx"
+    AddFile "data/miniasahamabe.nsbtx"
+    AddFile "data/miniasasea.nsbtx"
+    AddFile "data/minihamabe.nsbtx"
+    AddFile "data/minimum.nsbtx"
+    AddFile "data/minirhana.nsbtx"
+    AddFile "data/namein.narc"
+    AddFile "data/nfont.NCGR"
+    AddFile "data/nfont.NCLR"
+    AddFile "data/pc.nsbca"
+    AddFile "data/pl_wifi.ncgr"
+    AddFile "data/pl_wm.ncgr"
+    AddFile "data/pl_wm.nclr"
+    AddFile "data/plbr.dat"
+    AddFile "data/plist_canm.resdat"
+    AddFile "data/plist_cell.resdat"
+    AddFile "data/plist_chr.resdat"
+    AddFile "data/plist_h.cldat"
+    AddFile "data/plist_pal.resdat"
+    AddFile "data/porucase_canm.resdat"
+    AddFile "data/porucase_celact.cldat"
+    AddFile "data/porucase_cell.resdat"
+    AddFile "data/porucase_chr.resdat"
+    AddFile "data/porucase_pal.resdat"
+    AddFile "data/pst_canm.resdat"
+    AddFile "data/pst_cell.resdat"
+    AddFile "data/pst_chr.resdat"
+    AddFile "data/pst_h.cldat"
+    AddFile "data/pst_pal.resdat"
+    AddFile "data/shop_canm.resdat"
+    AddFile "data/shop_cell.resdat"
+    AddFile "data/shop_chr.resdat"
+    AddFile "data/shop_h.cldat"
+    AddFile "data/shop_pal.resdat"
+    AddFile "data/slot.narc"
+    AddFile "data/smptm_koori.NANR"
+    AddFile "data/smptm_koori.NCER"
+    AddFile "data/smptm_koori.NCGR"
+    AddFile "data/smptm_koori.NCLR"
+    AddFile "data/smptm_nemuri.NANR"
+    AddFile "data/smptm_nemuri.NCER"
+    AddFile "data/smptm_nemuri.NCGR"
+    AddFile "data/smptm_nemuri.NCLR"
+    AddFile "data/str2uni.bin"
+    AddFile "data/t3_fl_b.nsbtx"
+    AddFile "data/t3_fl_p.nsbtx"
+    AddFile "data/t3_fl_r.nsbtx"
+    AddFile "data/t3_fl_y.nsbtx"
+    AddFile "data/test.atr"
+    AddFile "data/tmap_block.dat"
+    AddFile "data/tmap_flags.dat"
+    AddFile "data/tmapn_canm.resdat"
+    AddFile "data/tmapn_celact.cldat"
+    AddFile "data/tmapn_celact.txt"
+    AddFile "data/tmapn_cell.resdat"
+    AddFile "data/tmapn_chr.resdat"
+    AddFile "data/tmapn_pal.resdat"
+    AddFile "data/tmapn_res_canm.txt"
+    AddFile "data/tmapn_res_cell.txt"
+    AddFile "data/tmapn_res_chr.txt"
+    AddFile "data/tmapn_res_pal.txt"
+    AddFile "data/tradelist.narc"
+    AddFile "data/trapmark.narc"
+    AddFile "data/tw_arc_etc.naix"
+    AddFile "data/tw_arc_etc.narc"
+    AddFile "data/ug_anim.narc"
+    AddFile "data/ug_base_cur.nsbmd"
+    AddFile "data/ug_boygirl.NCGR"
+    AddFile "data/ug_boygirl.NCLR"
+    AddFile "data/ug_fossil.narc"
+    AddFile "data/ug_hero.NANR"
+    AddFile "data/ug_hero.NCER"
+    AddFile "data/ug_hole.NANR"
+    AddFile "data/ug_hole.NCER"
+    AddFile "data/ug_hole.NCGR"
+    AddFile "data/ug_parts.narc"
+    AddFile "data/ug_radar.narc"
+    AddFile "data/ug_trap.narc"
+    AddFile "data/ugeffect_obj_graphic.narc"
+    AddFile "data/uground_cell.resdat"
+    AddFile "data/uground_cellanm.resdat"
+    AddFile "data/uground_char.resdat"
+    AddFile "data/uground_char2.resdat"
+    AddFile "data/uground_clact.cldat"
+    AddFile "data/uground_pltt.resdat"
+    AddFile "data/uground_pltt2.resdat"
+    AddFile "data/ugroundeffect.naix"
+    AddFile "data/ugroundeffect.narc"
+    AddFile "data/underg_radar.narc"
+    AddFile "data/utility.bin"
+    AddFile "data/weather_sys.narc"
+    AddFile "data/wifi.ncgr"
+    AddFile "data/wifip2pmatch.narc"
+    AddFile "data/wm.ncgr"
+    AddFile "data/wm.nclr"
+    AddFile "data/sound/sound_data.sdat"
+
+    SetTargetPath /data
+    SetSourcePath ./res
+    AddFile "sound/pl_sound_data.sdat"
+
+    SetTargetPath /msgdata
+    SetSourcePath ./res/text
+    AddFile "pl_msg.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "msgdata/msg.narc"
+    AddFile "msgdata/scenario/scr_msg.narc"
+    AddFile "poketool/pokegra/dp_height.narc"
+    AddFile "poketool/pokegra/dp_height_o.narc"
+
+    SetTargetPath /poketool/pokegra
+    SetSourcePath ./res/pokemon
+    AddFile "height.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "poketool/pokegra/height_o.narc"
+    AddFile "poketool/pokegra/otherpoke.narc"
+
+    SetTargetPath /poketool/pokegra
+    SetSourcePath ./res/pokemon
+    AddFile "pl_otherpoke.narc"
+    AddFile "pl_pokegra.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "poketool/pokegra/poke_shadow.narc"
+    AddFile "poketool/pokegra/poke_shadow_ofx.narc"
+    AddFile "poketool/pokegra/poke_yofs.narc"
+    AddFile "poketool/pokegra/pokegra.narc"
+    AddFile "poketool/trgra/trbgra.narc"
+    AddFile "poketool/trgra/trfgra.narc"
+    AddFile "poketool/personal/personal.narc"
+
+    SetTargetPath /poketool/personal
+    SetSourcePath ./res/pokemon
+    AddFile "pl_personal.narc"
+    AddFile "evo.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "poketool/personal/growtbl.narc"
+
+    SetTargetPath /poketool/personal
+    SetSourcePath ./res/pokemon
+    AddFile "pl_growtbl.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "poketool/personal/pms.narc"
+
+    SetTargetPath /poketool/personal
+    SetSourcePath ./res/pokemon
+    AddFile "wotbl.narc"
+
+    SetTargetPath /poketool/trainer
+    SetSourcePath ./res/trainers
+    AddFile "trdata.narc"
+    AddFile "trpoke.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "poketool/trmsg/trtbl.narc"
+    AddFile "poketool/trmsg/trtblofs.narc"
+    AddFile "battle/graphic/b_bag_gra.narc"
+    AddFile "battle/graphic/b_plist_gra.narc"
+    AddFile "battle/graphic/batt_bg.narc"
+    AddFile "battle/graphic/batt_obj.narc"
+    AddFile "battle/graphic/pl_b_plist_gra.narc"
+    AddFile "battle/graphic/pl_batt_bg.narc"
+    AddFile "battle/graphic/pl_batt_obj.narc"
+    AddFile "battle/graphic/vs_demo_gra.narc"
+    AddFile "wazaeffect/we.arc"
+    AddFile "wazaeffect/we_sub.narc"
+
+    SetTargetPath /battle/skill
+    SetSourcePath ./res/battle/scripts
+    AddFile "be_seq.narc"
+    AddFile "sub_seq.narc"
+    AddFile "waza_seq.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "wazaeffect/effectclact/wecell.narc"
+    AddFile "wazaeffect/effectclact/wecellanm.narc"
+    AddFile "wazaeffect/effectclact/wechar.narc"
+    AddFile "wazaeffect/effectclact/wepltt.narc"
+
+    SetTargetPath /poketool/waza
+    SetSourcePath ./res/battle/moves
+    AddFile "pl_waza_tbl.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "poketool/waza/waza_tbl.narc"
+
+    SetTargetPath /fielddata/script
+    SetSourcePath ./res/field/scripts
+    AddFile "scr_seq.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "graphic/bag_gra.narc"
+    AddFile "graphic/box.narc"
+    AddFile "graphic/btower.narc"
+    AddFile "graphic/bucket.narc"
+
+    SetTargetPath /graphic
+    SetSourcePath ./res/graphics/options_menu
+    AddFile "config_gra.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "graphic/demo_trade.narc"
+    AddFile "graphic/dendou_demo.narc"
+    AddFile "graphic/dendou_pc.narc"
+    AddFile "graphic/ending.narc"
+    AddFile "graphic/ev_pokeselect.narc"
+    AddFile "graphic/f_note_gra.narc"
+
+    SetTargetPath /graphic
+    SetSourcePath ./res/graphics/signposts
+    AddFile "field_board.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "graphic/field_encounteffect.narc"
+    AddFile "graphic/fld_comact.narc"
+    AddFile "graphic/font.narc"
+    AddFile "graphic/fontoam.narc"
+    AddFile "graphic/footprint_board.narc"
+    AddFile "graphic/hiden_effect.narc"
+    AddFile "graphic/imageclip.narc"
+    AddFile "graphic/library_tv.narc"
+    AddFile "graphic/lobby_news.narc"
+    AddFile "graphic/mail_gra.narc"
+    AddFile "graphic/menu_gra.narc"
+    AddFile "graphic/mysign.narc"
+    AddFile "graphic/mystery.narc"
+    AddFile "graphic/ntag_gra.narc"
+    AddFile "graphic/nutmixer.narc"
+    AddFile "graphic/oekaki.narc"
+    AddFile "graphic/opening.narc"
+    AddFile "graphic/pl_bag_gra.narc"
+
+    SetTargetPath /graphic
+    SetSourcePath ./res/fonts
+    AddFile "pl_font.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "graphic/pl_plist_gra.narc"
+
+    SetTargetPath /graphic
+    SetSourcePath ./res/graphics/pokemon_summary_screen
+    AddFile "pl_pst_gra.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "graphic/pl_wifinote.narc"
+
+    SetTargetPath /graphic
+    SetSourcePath ./res/graphics/windows
+    AddFile "pl_winframe.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "graphic/plist_gra.narc"
+    AddFile "graphic/pmsi.narc"
+    AddFile "graphic/poketch.narc"
+    AddFile "graphic/poru_gra.narc"
+    AddFile "graphic/poruact.narc"
+    AddFile "graphic/porudemo.narc"
+    AddFile "graphic/pst_gra.narc"
+    AddFile "graphic/ranking.narc"
+    AddFile "graphic/record.narc"
+    AddFile "graphic/shop_gra.narc"
+    AddFile "graphic/tmap_gra.narc"
+    AddFile "graphic/touch_subwindow.narc"
+    AddFile "graphic/trainer_case.narc"
+    AddFile "graphic/unionobj2d_onlyfront.narc"
+    AddFile "graphic/unionroom.narc"
+    AddFile "graphic/waza_oshie_gra.narc"
+    AddFile "graphic/wifi2dchar.narc"
+    AddFile "graphic/wifi_lobby.narc"
+    AddFile "graphic/wifi_lobby_other.narc"
+    AddFile "graphic/wifi_unionobj.narc"
+    AddFile "graphic/winframe.narc"
+    AddFile "graphic/worldtimer.narc"
+    AddFile "graphic/worldtrade.narc"
+    AddFile "itemtool/itemdata/item_data.narc"
+    AddFile "itemtool/itemdata/item_icon.narc"
+
+    SetTargetPath /itemtool/itemdata
+    SetSourcePath ./res/items
+    AddFile "nuts_data.narc"
+    AddFile "pl_item_data.narc"
+
+    SetTargetPath /poketool/icongra
+    SetSourcePath ./res/pokemon
+    AddFile "pl_poke_icon.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "poketool/icongra/poke_icon.narc"
+    AddFile "poketool/pokefoot/pokefoot.narc"
+    AddFile "data/mmodel/mmodel.narc"
+    AddFile "data/mmodel/fldeff.narc"
+    AddFile "wazaeffect/effectdata/ball_particle.narc"
+    AddFile "wazaeffect/effectdata/waza_particle.narc"
+
+    SetTargetPath /fielddata/eventdata
+    SetSourcePath ./res/field/events
+    AddFile "zone_event.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "fielddata/encountdata/d_enc_data.narc"
+    AddFile "fielddata/encountdata/p_enc_data.narc"
+
+    SetTargetPath /fielddata/encountdata
+    SetSourcePath ./res/field/encounters
+    AddFile "pl_enc_data.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "fielddata/build_model/build_model.narc"
+    AddFile "fielddata/build_model/build_model_matshp.dat"
+    AddFile "fielddata/mapmatrix/map_matrix.narc"
+    AddFile "fielddata/areadata/area_data.narc"
+    AddFile "fielddata/areadata/area_build_model/area_build.narc"
+    AddFile "fielddata/areadata/area_build_model/areabm_texset.narc"
+    AddFile "fielddata/areadata/area_map_tex/map_tex_set.narc"
+    AddFile "fielddata/areadata/area_move_model/move_model_list.narc"
+    AddFile "fielddata/land_data/land_data.narc"
+    AddFile "contest/data/contest_data.narc"
+    AddFile "particledata/particledata.narc"
+
+    SetTargetPath /application/zukanlist/zkn_data
+    SetSourcePath ./res/pokemon
+    AddFile "zukan_data.narc"
+    AddFile "zukan_data_gira.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "application/wifi_earth/wifi_earth.narc"
+    AddFile "application/wifi_earth/wifi_earth_place.narc"
+    AddFile "application/custom_ball/data/cb_data.narc"
+    AddFile "demo/egg/data/egg_data.narc"
+    AddFile "demo/egg/data/particle/egg_demo_particle.narc"
+    AddFile "fielddata/mm_list/move_model_list.narc"
+    AddFile "pokeanime/poke_anm.narc"
+    AddFile "pokeanime/pl_poke_anm.narc"
+    AddFile "battle/tr_ai/tr_ai_seq.narc"
+    AddFile "arc/area_win_gra.narc"
+    AddFile "arc/balance_ball_gra.narc"
+    AddFile "arc/bm_anime.narc"
+    AddFile "arc/bm_anime_list.narc"
+    AddFile "arc/codein_gra.narc"
+    AddFile "arc/demo_tengan_gra.narc"
+    AddFile "arc/email_gra.narc"
+
+    SetTargetPath /arc
+    SetSourcePath ./res/field/encounters
+    AddFile "encdata_ex.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "arc/manene.narc"
+    AddFile "arc/plgym_ghost.narc"
+
+    SetTargetPath /arc
+    SetSourcePath ./res/pokemon
+    AddFile "ppark.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "arc/ship_demo.narc"
+    AddFile "arc/ship_demo_pl.narc"
+    AddFile "arc/tv.narc"
+    AddFile "fielddata/maptable/mapname.bin"
+    AddFile "poketool/pokezukan.narc"
+
+    SetTargetPath /poketool
+    SetSourcePath ./res/pokemon
+    AddFile "pl_pokezukan.narc"
+    AddFile "shinzukan.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "poketool/pokeanm/pokeanm.narc"
+    AddFile "poketool/pokeanm/pl_pokeanm.narc"
+    AddFile "demo/shinka/data/particle/shinka_demo_particle.narc"
+    AddFile "demo/intro/intro.narc"
+    AddFile "demo/intro/intro_tv.narc"
+    AddFile "demo/syoujyou/syoujyou.narc"
+    AddFile "battle/b_tower/btdpm.narc"
+    AddFile "battle/b_tower/btdtr.narc"
+    AddFile "application/zukanlist/zkn_data/zukan_enc_diamond.narc"
+    AddFile "application/zukanlist/zkn_data/zukan_enc_pearl.narc"
+
+    SetTargetPath /application/zukanlist/zkn_data
+    SetSourcePath ./res/field/encounters
+    AddFile "zukan_enc_platinum.narc"
+
+    SetTargetPath /poketool/poke_edit
+    SetSourcePath ./res/pokemon
+    AddFile "pl_poke_data.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+    AddFile "debug/cb_edit/d_test.narc"
+    AddFile "application/custom_ball/edit/pl_cb_data.narc"
+    AddFile "frontier/script/fr_script.narc"
+    AddFile "particledata/pl_frontier/frontier_particle.narc"
+    AddFile "application/balloon/graphic/balloon_gra.narc"
+    AddFile "application/wifi_lobby/map_conv/wflby_map.narc"
+    AddFile "fielddata/tornworld/tw_arc.narc"
+    AddFile "fielddata/tornworld/tw_arc_attr.narc"
+    AddFile "particledata/pl_pokelist/pokelist_particle.narc"
+    AddFile "battle/b_pl_stage/pl_bsdpm.narc"
+    AddFile "battle/b_pl_tower/pl_btdpm.narc"
+    AddFile "battle/b_pl_tower/pl_btdtr.narc"
+    AddFile "application/bucket/ballslow_data.narc"
+    AddFile "particledata/pl_etc/pl_etc_particle.narc"
+    AddFile "contest/graphic/contest_bg.narc"
+    AddFile "contest/graphic/contest_obj.narc"
+    AddFile "demo/title/op_demo.narc"
+    AddFile "demo/title/titledemo.narc"
+
+    SetTargetPath /fielddata/pokemon_trade
+    SetSourcePath ./res/field/trades
+    AddFile "fld_trade.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
+
+    AddFile "resource/eng/zukan/zukan.narc"
+    AddFile "resource/eng/batt_rec/batt_rec_gra.narc"
+    AddFile "resource/eng/wifi_lobby_minigame/wlmngm_tool.narc"
+    AddFile "resource/eng/frontier_graphic/frontier_bg.narc"
+    AddFile "resource/eng/frontier_graphic/frontier_obj.narc"
+    AddFile "resource/eng/scratch/scratch.narc"
+    AddFile "resource/eng/pms_aikotoba/pms_aikotoba.narc"
+    AddFile "dwc/utility.bin"
+}
