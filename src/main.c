@@ -11,13 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "layout.h"
 #include "lexer.h"
 #include "parser.h"
-
-typedef struct {
-    char *p;
-    isize len;
-} String;
 
 typedef struct {
     const char *p_line;
@@ -152,31 +148,31 @@ int main(int argc, char **argv)
         free(source.p);
         exit(EXIT_FAILURE);
     }
-
     free(lexed.tokens);
     free(source.p);
 
-    ROMSpec *romspec = parsed.spec;
-    printf("== Properties ==\n");
-    printf("  - Title:        “%.*s”\n", LEN_TITLE, romspec->properties.title);
-    printf("  - Serial:       “%.*s”\n", LEN_SERIAL, romspec->properties.serial);
-    printf("  - Maker:        “%.*s”\n", LEN_MAKER, romspec->properties.maker);
-    printf("  - Revision:     %u\n", romspec->properties.revision);
-    printf("  - Pad to end?   %s\n", romspec->properties.pad_to_end ? "yes" : "no");
-    printf("  - ROM type      %s\n", romspec->properties.rom_type == 0x051E ? "MROM" : "PROM");
-    printf("  - ROM capacity: 0x%08X\n", romspec->properties.capacity);
-    printf("== ARM9 ==\n");
-    printf("  - Code Binary:   %s\n", romspec->arm9.code_binary_fpath);
-    printf("  - Definitions:   %s\n", romspec->arm9.definitions_fpath);
-    printf("  - Overlay Table: %s\n", romspec->arm9.overlay_table_fpath);
-    printf("== ARM7 ==\n");
-    printf("  - Code Binary:   %s\n", romspec->arm7.code_binary_fpath);
-    printf("  - Definitions:   %s\n", romspec->arm7.definitions_fpath);
-    printf("  - Overlay Table: %s\n", romspec->arm7.overlay_table_fpath);
-    printf("== Filesys Layout ==\n");
-    for (u32 i = 0; i < romspec->len_files; i++) {
-        printf("  %s -> %s\n", romspec->files[i].target_path, romspec->files[i].source_path);
+    LayoutResult laidout = compute_rom_layout(parsed.spec);
+    ROMLayout *layout = laidout.layout;
+    FilesysDirectory *directories = layout->filesystem->data;
+
+    printf("== VIRTUAL FILESYSTEM ==\n");
+    printf("Directory count: %d\n", directories[0].parent);
+    for (u32 i = 0; i < directories[0].parent; i++) {
+        printf("/%.*s -> d: 0x%X, f: 0x%04X\n", directories[i].full_name_len, directories[i].full_name, directories[i].dir_id, directories[i].first_file_id);
+
+        Vector *children = &directories[i].children;
+        for (u32 j = 0; j < children->len; j++) {
+            FilesysNode *node = &((FilesysNode *)children->data)[j];
+            printf("  - (%c) %.*s\n", node->is_subdir ? 'D' : 'F', node->name_len, node->name);
+        }
+    }
+
+    printf("== MEMBER FILES ==\n");
+    for (u32 i = 0; i < parsed.spec->len_files; i++) {
+        File *file = &parsed.spec->files[i];
+        printf("  - 0x%04X -> %s\n", file->filesys_id, file->target_path);
     }
 
     dspec(parsed.spec);
+    dlayout(layout);
 }
