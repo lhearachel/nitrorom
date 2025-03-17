@@ -17,9 +17,14 @@
 #include "io.h"
 #include "parser.h"
 
+typedef struct Filesystem {
+    Vector *directories;
+    u32 fnt_size;
+} Filesystem;
+
 static ARMDefinitions load_arm_defs(char *filename);
 static int compare_files(const void *a, const void *b);
-static Vector *build_filesystem(File *sorted, File *unsorted, u32 num_files, u32 file_id);
+static Filesystem build_filesystem(File *sorted, File *unsorted, u32 num_files, u32 file_id);
 
 LayoutResult compute_rom_layout(ROMSpec *romspec)
 {
@@ -40,7 +45,9 @@ LayoutResult compute_rom_layout(ROMSpec *romspec)
     // the unsorted files. This is also where we validate if any duplicate
     // target files were specified.
     u32 first_file_id = layout->arm9_defs.num_overlays + layout->arm7_defs.num_overlays;
-    layout->filesystem = build_filesystem(sorted_files, romspec->files, romspec->len_files, first_file_id);
+    Filesystem filesys = build_filesystem(sorted_files, romspec->files, romspec->len_files, first_file_id);
+    layout->filesystem = filesys.directories;
+    layout->fnt_size = filesys.fnt_size;
 
     free(sorted_files);
     return (LayoutResult){
@@ -127,7 +134,6 @@ static const char *strchr_n(const char *s, u32 n, char c)
     return p;
 }
 
-// BUG: e.g., `data/sound` out of order
 static int compare_files(const void *a, const void *b)
 {
     const File *f_a = a;
@@ -173,12 +179,15 @@ static void split_subpaths(char *path, u32 path_len, u32 subpath_lens[8], u32 *n
 #define INIT_CAP 32
 
 // TODO: Error codes for duplicate filenames
-static Vector *build_filesystem(File *sorted, File *unsorted, u32 num_files, u32 file_id)
+static Filesystem build_filesystem(File *sorted, File *unsorted, u32 num_files, u32 file_id)
 {
     HashMap *pathmap = hm_new();
+
+    // Allocate enough space for each file to have a single parent directory.
+    // If a user decides that each file needs two nested folders, tough.
     Vector *filesys = malloc(sizeof(Vector));
-    filesys->data = calloc(INIT_CAP, sizeof(FilesysDirectory));
-    filesys->cap = INIT_CAP;
+    filesys->data = calloc(num_files >> 1, sizeof(FilesysDirectory));
+    filesys->cap = num_files >> 1;
     filesys->len = 0;
 
     // The first directory is always root.
@@ -186,7 +195,7 @@ static Vector *build_filesystem(File *sorted, File *unsorted, u32 num_files, u32
     root->full_name = "";
     root->full_name_len = 0;
     root->first_file_id = file_id;
-    root->dir_id = 0;
+    root->dir_id = 0xF000;
     root->parent = 0xF001; // implicit directory counter
     root->children = (Vector){
         .data = calloc(INIT_CAP, sizeof(FilesysNode)),
@@ -194,9 +203,10 @@ static Vector *build_filesystem(File *sorted, File *unsorted, u32 num_files, u32
         .len = 0,
     };
 
+    u32 fnt_size = 0;
     u32 subpath_lens[8] = {0};
     for (u32 i = 0; i < num_files; i++) {
-        char *target_path = &sorted[i].target_path[1];
+        char *target_path = &sorted[i].target_path[1]; // i == 191
         char *final_slash = strrchr(target_path, '/');
         char *basename = final_slash + 1;
         u32 dirname_len = final_slash - target_path;
@@ -206,12 +216,14 @@ static Vector *build_filesystem(File *sorted, File *unsorted, u32 num_files, u32
 
         // Find the longest matching subtable by full name; default to root.
         split_subpaths(target_path, dirname_len, subpath_lens, &num_subpaths);
-        FilesysDirectory *parent = hm_rfind(pathmap, target_path, num_subpaths, subpath_lens, &j);
+        int parent_idx = hm_rfind(pathmap, target_path, num_subpaths, subpath_lens, &j);
 
         char *component = target_path;
-        if (!parent) {
-            parent = get(filesys, FilesysDirectory, 0); // dodge potential pointer invalidation
+        FilesysDirectory *parent;
+        if (parent_idx == -1) {
+            parent = get(filesys, FilesysDirectory, 0);
         } else {
+            parent = get(filesys, FilesysDirectory, parent_idx);
             component = target_path + subpath_lens[j] + 1;
             j++;
         }
@@ -238,10 +250,15 @@ static Vector *build_filesystem(File *sorted, File *unsorted, u32 num_files, u32
             node->subdir_id = child->dir_id;
 
             // Register the child in the map and iterate forward.
-            hm_set(pathmap, child->full_name, child->full_name_len, child);
+            hm_set(pathmap, child->full_name, child->full_name_len, child->dir_id & 0x0FFF);
             parent = child;
             component = target_path + subpath_lens[j] + 1;
             get(filesys, FilesysDirectory, 0)->parent++;
+
+            fnt_size += 3 + node->name_len;
+            //          ^   ~~~~~~~~~~~~~^
+            //          |                `--> sub-directory name, no 0-terminator
+            //          `-------------------> type+length byte + sub-directory ID
         }
 
         // Create the file onto the child subtable.
@@ -250,11 +267,20 @@ static Vector *build_filesystem(File *sorted, File *unsorted, u32 num_files, u32
         file->name_len = basename_len;
         file->is_subdir = false;
         unsorted[sorted[i].packing_id].filesys_id = file_id++;
+
+        fnt_size += 1 + file->name_len;
     }
 
     hm_free(pathmap);
     get(filesys, FilesysDirectory, 0)->parent &= 0x0FFF;
-    return filesys;
+
+    // directory-headers are 8 bytes each, and each directory-table has a null-terminator
+    fnt_size += (9 * get(filesys, FilesysDirectory, 0)->parent);
+
+    return (Filesystem){
+        .directories = filesys,
+        .fnt_size = fnt_size,
+    };
 }
 
 void dlayout(ROMLayout *layout)

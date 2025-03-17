@@ -44,7 +44,7 @@ static u64 hashkey(const char *key, u32 keylen)
     return hash;
 }
 
-void *hm_get(HashMap *map, char *key, u32 keylen)
+int hm_get(HashMap *map, char *key, u32 keylen)
 {
     u64 hash = hashkey(key, keylen);
     u32 idx = HASH_IDX(hash, map->cap);
@@ -58,30 +58,30 @@ void *hm_get(HashMap *map, char *key, u32 keylen)
         idx = (idx + 1 >= map->cap) ? 0 : idx + 1;
     }
 
-    return null;
+    return -1;
 }
 
-void *hm_find(HashMap *map, char *key, int numlens, u32 keylens[], u32 *match_i)
+int hm_find(HashMap *map, char *key, int numlens, u32 keylens[], u32 *match_i)
 {
     int i;
-    void *found = null;
-    for (i = 0; i < numlens && !found; i++) {
+    int found = -1;
+    for (i = 0; i < numlens && found < 0; i++) {
         found = hm_get(map, key, keylens[i]);
     }
 
-    *match_i = found ? i - 1 : 0;
+    *match_i = found >= 0 ? i - 1 : 0;
     return found;
 }
 
-void *hm_rfind(HashMap *map, char *key, int numlens, u32 keylens[], u32 *match_i)
+int hm_rfind(HashMap *map, char *key, int numlens, u32 keylens[], u32 *match_i)
 {
     int i;
-    void *found = null;
-    for (i = numlens - 1; i >= 0 && !found; i--) {
+    int found = -1;
+    for (i = numlens - 1; i >= 0 && found < 0; i--) {
         found = hm_get(map, key, keylens[i]);
     }
 
-    *match_i = found ? i + 1 : 0;
+    *match_i = found >= 0 ? i + 1 : 0;
     return found;
 }
 
@@ -128,9 +128,9 @@ static void expand(HashMap *map)
     map->cap = new_cap;
 }
 
-void hm_set(HashMap *map, char *key, u32 keylen, void *value)
+void hm_set(HashMap *map, char *key, u32 keylen, int value)
 {
-    assert(value != null);
+    assert(value != -1);
 
     if (map->len * 2 >= map->cap) {
         expand(map);

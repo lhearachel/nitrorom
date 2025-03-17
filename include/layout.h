@@ -44,6 +44,7 @@ typedef struct {
     ARMDefinitions arm9_defs;
     ARMDefinitions arm7_defs;
     Vector *filesystem;
+    u32 fnt_size;
 } ROMLayout;
 
 typedef struct {
