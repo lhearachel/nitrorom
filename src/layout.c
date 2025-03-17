@@ -10,11 +10,11 @@
 
 #include "layout.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "hashmap.h"
+#include "io.h"
 #include "parser.h"
 
 static ARMDefinitions load_arm_defs(char *filename);
@@ -46,29 +46,6 @@ LayoutResult compute_rom_layout(ROMSpec *romspec)
     return (LayoutResult){
         .layout = layout,
         .err_code = 0,
-    };
-}
-
-static String fload(const char *filename)
-{
-    FILE *f = fopen(filename, "rb");
-    if (!f) {
-        fprintf(stderr, "cannot open file “%s”\n", filename);
-        exit(EXIT_FAILURE);
-    }
-
-    fseek(f, 0, SEEK_END);
-    isize fsize = ftell(f);
-    rewind(f);
-
-    char *dest = malloc(fsize + 1);
-    fread(dest, 1, fsize, f);
-    fclose(f);
-
-    dest[fsize] = '\0';
-    return (String){
-        .p = dest,
-        .len = fsize,
     };
 }
 
