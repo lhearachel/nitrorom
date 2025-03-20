@@ -20,10 +20,9 @@ typedef struct Vector {
 } Vector;
 
 // clang-format off
-#define grow(v, T) (                                      \
-    (v)->cap *= 2,                                        \
-    (v)->data = realloc((v)->data, sizeof(T) * (v)->cap), \
-    (v)->data                                             \
+#define grow(v, T) (                         \
+    (v)->cap *= 2,                           \
+    realloc((v)->data, sizeof(T) * (v)->cap) \
 )
 
 #define push(v, T) (                     \
