@@ -100,6 +100,8 @@ typedef enum {
     S_param_romtype,
     S_param_romcapacity,
     S_param_padtoend,
+    S_param_headertemplate,
+    S_param_bootmenubanner,
 
     S_param_arm9_codebinary,
     S_param_arm9_definitions,
@@ -186,6 +188,8 @@ ParseResult parse(Token *tokens, int num_tokens, const char *source)
     ROMSpec *spec = calloc(1, sizeof(ROMSpec));
     spec->files = malloc(sizeof(File) * INITIAL_FILELIST_CAPACITY);
     spec->cap_files = INITIAL_FILELIST_CAPACITY;
+    spec->properties.header_fpath = calloc(LEN_FILEPATH, 1);
+    spec->properties.banner_fpath = calloc(LEN_FILEPATH, 1);
     alloc_arm_paths(&spec->arm9);
     alloc_arm_paths(&spec->arm7);
 
@@ -249,6 +253,16 @@ ParseResult parse(Token *tokens, int num_tokens, const char *source)
 
         case S_param_padtoend:
             take_boolean(spec->properties.pad_to_end);
+            state = S_properties;
+            break;
+
+        case S_param_headertemplate:
+            take_filepath(spec->properties.header_fpath);
+            state = S_properties;
+            break;
+
+        case S_param_bootmenubanner:
+            take_filepath(spec->properties.banner_fpath);
             state = S_properties;
             break;
 
@@ -423,6 +437,8 @@ static const u8 transition[NUM_SECTION_STATES][NUM_TOKEN_TYPES] = {
         [T_param_romtype] = S_param_romtype,
         [T_param_romcapacity] = S_param_romcapacity,
         [T_param_padtoend] = S_param_padtoend,
+        [T_param_headertemplate] = S_param_headertemplate,
+        [T_param_bootmenubanner] = S_param_bootmenubanner,
 
         // These are not. We have a nicer error message for this.
         [T_param_codebinary] = E_invalid_section_param,

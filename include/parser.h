@@ -25,6 +25,8 @@ typedef struct {
     u8 pad_to_end;
     u16 rom_type;
     u32 capacity;
+    char *header_fpath;
+    char *banner_fpath;
 } Properties;
 
 typedef struct {

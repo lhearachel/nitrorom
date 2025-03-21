@@ -30,6 +30,8 @@ typedef enum {
     T_param_romtype,
     T_param_romcapacity,
     T_param_padtoend,
+    T_param_headertemplate,
+    T_param_bootmenubanner,
 
     // Parameters for the ARM9 / ARM7 sections
     T_param_codebinary,

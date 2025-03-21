@@ -19,17 +19,15 @@
 #include "parser.h"
 
 static byte *makefnt(Vector *filesystem, u32 size);
-static void makerom(const char *template, const char *banner, ROMSpec *spec, ROMLayout *layout);
+static void makerom(ROMSpec *spec, ROMLayout *layout);
 
 int main(int argc, char **argv)
 {
     if (argc == 1) {
-        fprintf(stderr, "Usage: ndsmake TEMPLATE BANNER SPECFILE\n");
+        fprintf(stderr, "Usage: ndsmake SPECFILE\n");
     }
 
-    const char *template = argv[1];
-    const char *banner = argv[2];
-    const char *specfile = argv[3];
+    const char *specfile = argv[1];
     String source = fload(specfile);
 
     LexResult lexed = lex(source.p, source.len);
@@ -49,7 +47,7 @@ int main(int argc, char **argv)
     free(source.p);
 
     LayoutResult laidout = compute_rom_layout(parsed.spec);
-    makerom(template, banner, parsed.spec, laidout.layout);
+    makerom(parsed.spec, laidout.layout);
 
     byte *fnt = makefnt(laidout.layout->filesystem, laidout.layout->fnt_size);
     FILE *fnt_f = fopen("fnt.sbin", "wb");
@@ -163,11 +161,11 @@ static byte *makefnt(Vector *filesystem, u32 size)
     return fnt;
 }
 
-static void makerom(const char *template, const char *banner, ROMSpec *spec, ROMLayout *layout)
+static void makerom(ROMSpec *spec, ROMLayout *layout)
 {
     u32 cursor = 0, file_id = 0;
 
-    cursor = emit_file(0, 0xFFFF, template, null);
+    cursor = emit_file(0, 0xFFFF, spec->properties.header_fpath, null);
     cursor = emit_file(cursor, 0xFFFF, spec->arm9.code_binary_fpath, null);
     if (layout->arm9_defs.num_overlays) {
         cursor = emit_file(cursor, 0xFFFF, spec->arm9.overlay_table_fpath, null);
@@ -184,11 +182,10 @@ static void makerom(const char *template, const char *banner, ROMSpec *spec, ROM
         }
     }
 
-    // TODO: Build actual FNT, FAT
     cursor = emit_table(cursor, "*FILENAMES*", layout->fnt_size);
     cursor = emit_table(cursor, "*FILEALLOC*", 8 * (file_id + spec->len_files));
 
-    cursor = emit_file(cursor, 0xFFFF, banner, null);
+    cursor = emit_file(cursor, 0xFFFF, spec->properties.banner_fpath, null);
     for (u32 i = 0; i < spec->len_files; i++) {
         File *file = (File *)spec->files + i;
         cursor = emit_file(cursor, file->filesys_id, file->source_path, file->target_path);

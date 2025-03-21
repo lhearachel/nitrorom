@@ -31,10 +31,6 @@ typedef enum {
 
     // non-terminal states; these will permit the state-machine to continue
     // consuming characters until the token is complete.
-    // TODO: do we need to eat through the whole token before processing? this
-    // would effectively result in double-iterating all identifiers... but that
-    // is probably cheaper than branch-mispredictions if scanning for a
-    // terminating character, which would treated as a randomly-bounded loop.
     S_scan,              // whitespace outside a section
     S_scan_section,      // whitespace inside a section
     S_eat_comment,       // eat all characters until the next '\n'
@@ -275,11 +271,17 @@ static TokenType map_section_keyword(const char *token, int len)
     case 'A':
         return if_keyword_match(token, "AddFile", T_direc_addfile);
 
+    case 'B':
+        return if_keyword_match(token, "BootMenuBanner", T_param_bootmenubanner);
+
     case 'C':
         return if_keyword_match(token, "CodeBinary", T_param_codebinary);
 
     case 'D':
         return if_keyword_match(token, "Definitions", T_param_definitions);
+
+    case 'H':
+        return if_keyword_match(token, "HeaderTemplate", T_param_headertemplate);
 
     case 'M':
         return if_keyword_match(token, "MakerCode", T_param_makercode)
