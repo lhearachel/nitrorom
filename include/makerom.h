@@ -8,10 +8,14 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef IO_H
-#define IO_H
+#ifndef MAKEROM_H
+#define MAKEROM_H
 
-String fload(const char *filename);
-u32 fsize(const char *filename);
+#include "layout.h"
+#include "parser.h"
+#include "vector.h"
 
-#endif // IO_H
+void makerom(ROMSpec *spec, ROMLayout *layout, byte *fnt, bool dryrun);
+byte *makefnt(Vector *filesystem, u32 size);
+
+#endif // MAKEROM_H

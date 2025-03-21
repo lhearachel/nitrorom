@@ -35,3 +35,18 @@ String fload(const char *filename)
         .len = fsize,
     };
 }
+
+u32 fsize(const char *filename)
+{
+    FILE *f = fopen(filename, "rb");
+    if (!f) {
+        fprintf(stderr, "could not open file “%s”\n", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    fseek(f, 0, SEEK_END);
+    u32 fsize = ftell(f);
+    fclose(f);
+
+    return fsize;
+}
