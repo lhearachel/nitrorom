@@ -1,19 +1,3 @@
-/*
- * Copyright 2025 <lhearachel@proton.me>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * This is a slightly-specialized implementation of a HashMap where keys are
- * string-slices rather than distinct null-terminated C-strings. It uses the
- * Fowler-Noll-Vo hash function for indexing keys (specifically FNV-1a) and a
- * basic iterative linear-probe to handle collisions. Values are stored as
- * integers; -1 is an invalid value.
- */
-
 #ifndef HASHMAP_H
 #define HASHMAP_H
 

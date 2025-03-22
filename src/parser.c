@@ -1,12 +1,4 @@
 /*
- * Copyright 2025 <lhearachel@proton.me>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
  * The grammar rules, in plain-English, are:
  *
  *   1. Section-titles must be followed by an open-brace. The lexer guarantees
