@@ -1,10 +1,15 @@
 # Compiler Artifacts
 *.o
 *.d
+*.out
 
 # Executables
 *.exe
 ndsmake
+
+# Valgrind artifacts
+valgrind.log
+vgcore.*
 
 # LSP / IDE integrations
 compile_commands.json
@@ -14,3 +19,4 @@ compile_commands.json
 # Temporary file ignores...
 *.back
 *.sbin
+*.nds

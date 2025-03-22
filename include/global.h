@@ -35,6 +35,8 @@ typedef uint32_t  bool;
 #define static_assert(c, ...)    _Static_assert(c, ##__VA_ARGS__)
 
 #define min(a, b) ((((a) <= (b)) * (a)) + (((a) > (b)) * (b)))
+
+#define unused(v) (void)(v)
 // clang-format on
 
 typedef struct {
