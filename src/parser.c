@@ -388,6 +388,8 @@ static State add_file(ROMSpec *spec, char *target_root, char *source_root, char 
 
 void dspec(ROMSpec *spec)
 {
+    free(spec->properties.header_fpath);
+    free(spec->properties.banner_fpath);
     free(spec->arm9.code_binary_fpath);
     free(spec->arm9.definitions_fpath);
     free(spec->arm9.overlay_table_fpath);

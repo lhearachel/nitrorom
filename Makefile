@@ -13,14 +13,14 @@ CFLAGS += -Wall -Wextra
 CFLAGS += -Iinclude
 CFLAGS += -include global.h
 
-CFLAGS += -fsanitize=unreachable
+CFLAGS += -fsanitize=address,undefined,unreachable
 CFLAGS += -fsanitize-trap
-LDFLAGS += -fsanitize=unreachable
+LDFLAGS += -fsanitize=address,undefined,unreachable
 LDFLAGS += -fsanitize-trap
 
 TARGET = ndsmake
 
-SRC = $(wildcard src/*.c) $(wildcard lib/*.c)
+SRC = $(wildcard src/*.c)
 OBJ = $(SRC:.c=.o)
 DEP = $(SRC:.c=.d)
 

@@ -52,7 +52,7 @@ static inline bool matchopt(char *opt, char *s, char *l)
 
 static inline bool isopt(char *s)
 {
-    return s[0] == '-' && (s[1] == '-' && s[2] != '\0');
+    return s[0] == '-' && (s[1] != '-' || s[2] != '\0');
 }
 
 static inline void usage(FILE *stream)
@@ -74,9 +74,6 @@ static Options parseopts(int argc, char **argv)
         printf("0.1.0\n");
         exit(EXIT_SUCCESS);
     }
-
-    argc--;
-    argv++;
 
     Options opts = {
         .workdir = ".",
@@ -148,9 +145,8 @@ int main(int argc, char **argv)
     free(lexed.tokens);
     free(source.p);
 
-    LayoutResult laidout = compute_rom_layout(parsed.spec);
-
     chdir(opts.workdir);
+    LayoutResult laidout = compute_rom_layout(parsed.spec);
     byte *fnt = makefnt(laidout.layout->filesystem, laidout.layout->fnt_size);
     makerom(parsed.spec, laidout.layout, fnt, opts.dryrun);
 

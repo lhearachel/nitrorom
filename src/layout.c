@@ -86,8 +86,9 @@ static ARMDefinitions load_arm_defs(char *filename)
         char *p = content.p + 0x10;
         for (u32 i = 0; i < defs.num_overlays; i++) {
             char *end = strchr(p, '\0');
-            defs.overlay_filenames[i] = malloc(end - p);
+            defs.overlay_filenames[i] = malloc(end - p + 1);
             strcpy(defs.overlay_filenames[i], p);
+            defs.overlay_filenames[i][end - p] = '\0';
             p = end + 1;
         }
     }
@@ -149,8 +150,8 @@ static int compare_files(const void *a, const void *b)
 
         result = strncmp_i(comp_a, comp_b, min(next_a - comp_a, next_b - comp_b));
 
-        comp_a = next_a + 1;
-        comp_b = next_b + 1;
+        comp_a = *next_a ? next_a + 1 : next_a;
+        comp_b = *next_b ? next_b + 1 : next_b;
         result = (*next_a == *next_b) ? result : (*next_a ? 1 : -1);
     } while (*comp_a && *comp_b && result == 0);
 
@@ -302,4 +303,5 @@ void dlayout(ROMLayout *layout)
     free(layout->arm7_defs.overlay_filenames);
     free(layout->filesystem->data);
     free(layout->filesystem);
+    free(layout);
 }

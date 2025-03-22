@@ -36,7 +36,7 @@ static u32 emit_file_dry(u32 *cursor, u16 filesys_id, const char *source_file, c
 static u32 emit_table_dry(u32 *cursor, const byte *table, u32 size)
 {
     u32 start = *cursor;
-    printf("%08X,%08X,FF,FFFF,%s,*\n", start, start + size, table);
+    printf("%08X,%08X,FF,FFFF,%s,*\n", start, start + size, (char *)table);
     *cursor = to512(start + size);
     return start + size;
 }
@@ -87,13 +87,10 @@ byte *makefnt(Vector *filesystem, u32 size)
         put_lehalf(p_header + 4, directory->first_file_id);
         put_lehalf(p_header + 6, directory->parent);
 
-        printf("dir: /%.*s\n", directory->full_name_len, directory->full_name);
         for (u32 j = 0; j < directory->children.len; j++) {
             FilesysNode *child = get(&directory->children, FilesysNode, j);
-            printf("  - child: %.*s\n", child->name_len, child->name);
 
-            u8 len_type = child->name_len | (child->is_subdir << 7);
-            p_contents[0] = len_type;
+            p_contents[0] = child->name_len | (child->is_subdir << 7);
             memcpy(p_contents + 1, child->name, child->name_len);
 
             p_contents += 1 + child->name_len;
@@ -138,7 +135,7 @@ void makerom(ROMSpec *spec, ROMLayout *layout, byte *fnt, bool dryrun)
     EmitFileFunc emit_file = emit_file_dry;
     EmitTableFunc emit_table = emit_table_dry;
 
-    u32 total_files = layout->arm9_defs.num_overlays + layout->arm7_defs.num_overlays + layout->filesystem->len;
+    u32 total_files = layout->arm9_defs.num_overlays + layout->arm7_defs.num_overlays + spec->len_files;
     FileAllocation *fat = calloc(total_files, sizeof(FileAllocation));
 
     emit_file(&cursor, 0xFFFF, spec->properties.header_fpath, null);
@@ -146,10 +143,13 @@ void makerom(ROMSpec *spec, ROMLayout *layout, byte *fnt, bool dryrun)
     emit_arm(&spec->arm7, &layout->arm7_defs, &cursor, &file_id, emit_file, fat);
 
     // Pretend to emit these tables and emit them at the end.
-    u32 fntbc = cursor;
-    cursor = to512(cursor + layout->fnt_size);
-    u32 fatbc = cursor;
-    cursor = to512(cursor + (8 * (file_id + spec->len_files)));
+    if (!dryrun) {
+        cursor = to512(cursor + layout->fnt_size);
+        cursor = to512(cursor + (8 * (file_id + spec->len_files)));
+    } else {
+        emit_table(&cursor, (byte *)"*FILENAMES*", layout->fnt_size);
+        emit_table(&cursor, (byte *)"*FILEALLOC*", total_files * sizeof(FileAllocation));
+    }
 
     emit_file(&cursor, 0xFFFF, spec->properties.banner_fpath, null);
     for (u32 i = 0; i < spec->len_files; i++) {
@@ -165,9 +165,6 @@ void makerom(ROMSpec *spec, ROMLayout *layout, byte *fnt, bool dryrun)
         put_leword(fatbp, fat[i].begin);
         put_leword(fatbp + 4, fat[i].end);
     }
-
-    emit_table(&fntbc, dryrun ? (byte *)"*FILENAMES*" : fnt, layout->fnt_size);
-    emit_table(&fatbc, dryrun ? (byte *)"*FILEALLOC*" : fatb, total_files * sizeof(FileAllocation));
 
     free(fatb);
     free(fat);
