@@ -338,7 +338,12 @@ ParseResult parse(Token *tokens, int num_tokens, const char *source)
 
 static inline char *join_paths(const char *restrict parent, const char *restrict child, u32 len_parent, u32 len_child)
 {
-    len_parent = (len_parent != 1) * len_parent; // If the parent is *just* root, then treat it as a zero-length string
+    // Trim trailing '/' characters.
+    const char *end = parent + len_parent - 1;
+    while (end >= parent && *end == '/') {
+        end--;
+        len_parent--;
+    }
 
     char *path = malloc(len_parent + len_child + 2); // 1 separator + null-term
     strcpy(path, parent);
