@@ -188,7 +188,7 @@ ParseResult parse(Token *tokens, int num_tokens, const char *source)
     State state = S_root;
     Token *p_token, *p_value;
     State error = E_none;
-    int tmp;
+    int tmp = 0;
 
     char source_root[LEN_FILEPATH] = {'.', '/', '\0'};
     char target_root[LEN_FILEPATH] = {'/', '\0'};
