@@ -6,10 +6,13 @@ Properties {
     Title       "POKEMON PL" # String-literals are wrapped in double-quotes.
     Serial      "CPUE"
     MakerCode   "01"
-    PadToEnd    false        # "true" and "false" are evaluated as booleans.
+    PadToEnd    true         # "true" and "false" are evaluated as booleans.
     Revision    0            # Number-literals can be in decimal format...
     ROMCapacity 0x08000000   # or hexadecimal by prefixing "0x".
     ROMType     PROM         # Some fields use special string-keys.
+
+    HeaderTemplate ../platinum.us/rom_header_template.sbin
+    BootMenuBanner ./platinum.us/banner.bnr
 }
 
 # Open-braces for sections can also be broken to the next line.
@@ -357,7 +360,13 @@ Layout {
     AddFile "graphic/pst_gra.narc"
     AddFile "graphic/ranking.narc"
     AddFile "graphic/record.narc"
-    AddFile "graphic/shop_gra.narc"
+
+    SetTargetPath /graphic
+    SetSourcePath ./res/graphics/shop_menu
+    AddFile "shop_gra.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
     AddFile "graphic/tmap_gra.narc"
     AddFile "graphic/touch_subwindow.narc"
     AddFile "graphic/trainer_case.narc"
@@ -409,13 +418,31 @@ Layout {
     SetSourcePath ./res/prebuilt
     AddFile "fielddata/build_model/build_model.narc"
     AddFile "fielddata/build_model/build_model_matshp.dat"
-    AddFile "fielddata/mapmatrix/map_matrix.narc"
+
+    SetTargetPath /fielddata/mapmatrix
+    SetSourcePath ./res/field/maps/matrices
+    AddFile "map_matrix.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
     AddFile "fielddata/areadata/area_data.narc"
     AddFile "fielddata/areadata/area_build_model/area_build.narc"
     AddFile "fielddata/areadata/area_build_model/areabm_texset.narc"
-    AddFile "fielddata/areadata/area_map_tex/map_tex_set.narc"
+
+    SetTargetPath /fielddata/areadata/area_map_tex
+    SetSourcePath ./res/field/maps/texture_sets
+    AddFile "map_tex_set.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
     AddFile "fielddata/areadata/area_move_model/move_model_list.narc"
-    AddFile "fielddata/land_data/land_data.narc"
+
+    SetTargetPath /fielddata/land_data
+    SetSourcePath ./res/field/maps/data
+    AddFile "land_data.narc"
+
+    SetTargetPath /
+    SetSourcePath ./res/prebuilt
     AddFile "contest/data/contest_data.narc"
     AddFile "particledata/particledata.narc"
 
