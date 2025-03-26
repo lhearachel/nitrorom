@@ -5,7 +5,7 @@ CFLAGS += -Wall -Wextra
 CFLAGS += -Iinclude
 CFLAGS += -include global.h
 
-TARGET = ndsmake
+TARGET = nitrorom
 
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:.c=.o)

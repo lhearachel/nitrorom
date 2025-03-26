@@ -5,7 +5,7 @@
 
 # Executables
 *.exe
-ndsmake
+nitrorom
 
 # Valgrind artifacts
 valgrind.log

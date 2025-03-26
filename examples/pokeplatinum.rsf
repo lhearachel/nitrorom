@@ -1,28 +1,18 @@
-# This is a comment. All text from the '#' to the end of the line is ignored.
-# A section begins with an open-brace ('{') and ends with a closing-brace ('}').
 Properties {
-    # Parameters for a given section are listed one-per-line and are separated
-    # from their associated value by a non-zero amount of inline whitespace.
-    Title       "POKEMON PL" # String-literals are wrapped in double-quotes.
+    Title       "POKEMON PL"
     Serial      "CPUE"
     MakerCode   "01"
-    PadToEnd    true         # "true" and "false" are evaluated as booleans.
-    Revision    0            # Number-literals can be in decimal format...
-    ROMCapacity 0x08000000   # or hexadecimal by prefixing "0x".
-    ROMType     PROM         # Some fields use special string-keys.
+    PadToEnd    true
+    Revision    0
+    ROMCapacity 0x08000000
+    ROMType     PROM
 
     HeaderTemplate ../platinum.us/rom_header_template.sbin
     BootMenuBanner ./platinum.us/banner.bnr
 }
 
-# Open-braces for sections can also be broken to the next line.
 ARM9
 {
-    # Filepath-literals begin with '.' or '/'. Characters which are normally
-    # restricted on Windows filesystems are considered invalid. All path-
-    # separators must be Unix-style ('/'), and any whitespace character will
-    # terminate the literal. If a filepath must contain spaces, then it must be
-    # written as a string-literal.
     CodeBinary   ./main.sbin
     Definitions  ./main_defs.sbin
     OverlayTable ./main_table.sbin
@@ -361,7 +351,7 @@ Layout {
     AddFile "graphic/ranking.narc"
     AddFile "graphic/record.narc"
 
-    SetTargetPath /graphic
+    SetTargetPath /graphic/
     SetSourcePath ./res/graphics/shop_menu
     AddFile "shop_gra.narc"
 

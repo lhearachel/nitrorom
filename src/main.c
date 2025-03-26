@@ -20,11 +20,11 @@ typedef struct Options {
 } Options;
 
 // clang-format off
-static const char *tagline = "ndsmake - Create Nintendo DS-compatible ROM files\n";
+static const char *tagline = "nitrorom - Create Nintendo DS ROM images\n";
 static const char *usagespec = ""
-    "Usage: ndsmake [OPTION]... SPECFILE\n"
-    "       ndsmake [-V / --version]\n"
-    "       ndsmake [-h / --help]\n"
+    "Usage: nitrorom [OPTION]... SPECFILE\n"
+    "       nitrorom [-V / --version]\n"
+    "       nitrorom [-h / --help]\n"
     "";
 static const char *options = ""
     "Options:\n"
@@ -61,7 +61,7 @@ static inline __attribute__((format(printf, 1, 2))) void errusage(const char *fm
     va_list argv;
     va_start(argv, fmt);
 
-    fputs("ndsmake: ", stderr);
+    fputs("nitrorom: ", stderr);
     vfprintf(stderr, fmt, argv);
     fputc('\n', stderr);
     usage(stderr);
@@ -172,10 +172,6 @@ static void drydump(ROMSpec *spec, ROMLayout *layout, ROMOffsets *offsets)
 
 int main(int argc, char **argv)
 {
-    if (argc == 1) {
-        fprintf(stderr, "Usage: ndsmake SPECFILE\n");
-    }
-
     Options opts = parseopts(argc, argv);
     String source = fload(opts.specfile);
     LexResult lexed = lex(source.p, source.len);
