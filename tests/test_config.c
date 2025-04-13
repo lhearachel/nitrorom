@@ -109,10 +109,8 @@ static cfgresult verify(const expect *expects, string sec, string key, string va
             res.msg,
             sizeof(res.msg),
             "unrecognized key: %.*s.%.*s",
-            (int)sec.len,
-            sec.s,
-            (int)key.len,
-            key.s
+            fmtstring(sec),
+            fmtstring(key)
         );
         return res;
     }
@@ -126,8 +124,7 @@ static cfgresult verify(const expect *expects, string sec, string key, string va
             match->sec.s,
             match->key.s,
             match->val.s,
-            (int)val.len,
-            val.s
+            fmtstring(val)
         );
         return res;
     }

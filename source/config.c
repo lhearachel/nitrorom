@@ -86,8 +86,7 @@ cfgresult cfgparse(string cfg, const cfgsection sections[], void *user)
                     res.msg,
                     sizeof(res.msg),
                     "expected known section-header, but found “%.*s”",
-                    (int)context.sec.len,
-                    context.sec.s
+                    fmtstring(context.sec)
                 );
                 return res;
             }

@@ -74,8 +74,7 @@ sheetsresult verify(sheetsrecord *record, void *user, int line)
                 sizeof(res.msg),
                 "expected field %ld to be %.*s, but found %s\n",
                 i,
-                (int)record->fields[i].len,
-                record->fields[i].s,
+                fmtstring(record->fields[i]),
                 expectrec->fields[i].s
             );
             return res;
