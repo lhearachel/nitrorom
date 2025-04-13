@@ -57,11 +57,17 @@ typedef struct sheetsrecord {
     unsigned long enclosed;                  // A bitmask denoting fields which are enclosed.
 } sheetsrecord;
 
+typedef struct sheetsresult {
+    int    code;
+    char   msg[128];
+    string pos;
+} sheetsresult;
+
 /*
  * Basic interface for consuming parse-events. This handler should return a non-zero error code if
  * the calling client cannot accept the parse-event.
  */
-typedef int (*sheetshandler)(sheetsrecord *record, void *user, int line);
+typedef sheetsresult (*sheetshandler)(sheetsrecord *record, void *user, int line);
 
 /*
  * Parse a string as tabulated data, consuming parse-events with handlers. Records within the data
@@ -76,7 +82,7 @@ typedef int (*sheetshandler)(sheetsrecord *record, void *user, int line);
  * fields to be emitted by successive records. Thus, the first record is permitted to be terminated
  * with any number of field-delimiters.
  */
-sheetserr dsvparse(
+sheetsresult dsvparse(
     string        table,
     sheetshandler headerfn,
     sheetshandler recordfn,
@@ -93,7 +99,7 @@ sheetserr dsvparse(
  * - Fields are delimited by `','`.
  * - Fields may be enclosed by `'"'`.
  */
-sheetserr csvparse(string table, sheetshandler headerfn, sheetshandler recordfn, void *user);
+sheetsresult csvparse(string table, sheetshandler headerfn, sheetshandler recordfn, void *user);
 
 /*
  * Wrapper around `dsvparse` for typical tab-separated values (TSV) data.
@@ -102,6 +108,6 @@ sheetserr csvparse(string table, sheetshandler headerfn, sheetshandler recordfn,
  * - Fields are delimited by `'\t'`.
  * - Fields may be enclosed by `'"'`.
  */
-sheetserr tsvparse(string table, sheetshandler headerfn, sheetshandler recordfn, void *user);
+sheetsresult tsvparse(string table, sheetshandler headerfn, sheetshandler recordfn, void *user);
 
 #endif // SHEETS_H

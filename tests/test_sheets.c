@@ -17,6 +17,12 @@
         return E_sheets_user;                \
     }
 
+#define sheetsresult(__code, __pos, __msg)               \
+    (sheetsresult)                                       \
+    {                                                    \
+        .code = (__code), .msg = (__msg), .pos = (__pos) \
+    }
+
 typedef struct expect {
     const char         *testkey;
     const char         *inputf;
@@ -26,33 +32,57 @@ typedef struct expect {
 
 static const expect expectations[];
 
-int verify(sheetsrecord *record, void *user, int line)
+sheetsresult verify(sheetsrecord *record, void *user, int line)
 {
     expect *expects = user;
-    if (record == NULL) die0("expected a record, but got NULL\n");
-    if (expects == NULL) die0("expected a user struct, but got NULL\n");
+    if (record == NULL) {
+        return sheetsresult(E_sheets_user, stringZ, "expected a record, but got NULL");
+    }
+    if (expects == NULL) {
+        return sheetsresult(E_sheets_user, stringZ, "expected a user struct, but got NULL");
+    }
     if ((unsigned long)line > expects->nrecords) {
-        die("expected at most %ld records, but got %d\n", expects->nrecords, line);
+        sheetsresult res = sheetsresult(E_sheets_user, stringZ, "");
+        snprintf(
+            res.msg,
+            sizeof(res.msg),
+            "expected at most %ld records, but got %d",
+            expects->nrecords,
+            line
+        );
+        return res;
     }
 
     const sheetsrecord *expectrec = &expects->records[line - 1];
     if (record->enclosed != expectrec->enclosed) {
-        die("expected enclosed = 0x%016lX, but got 0x%016lX\n",
+        sheetsresult res = sheetsresult(E_sheets_user, stringZ, "");
+        snprintf(
+            res.msg,
+            sizeof(res.msg),
+            "expected enclosed = 0x%016lX, but got 0x%016lX",
             expectrec->enclosed,
-            record->enclosed);
+            record->enclosed
+        );
+        return res;
     }
 
     for (unsigned long i = 0; i < record->nfields; i++) {
         if (!strequ(record->fields[i], expectrec->fields[i])) {
-            die("expected field %ld to be %.*s, but found %s\n",
+            sheetsresult res = sheetsresult(E_sheets_user, stringZ, "");
+            snprintf(
+                res.msg,
+                sizeof(res.msg),
+                "expected field %ld to be %.*s, but found %s\n",
                 i,
                 (int)record->fields[i].len,
                 record->fields[i].s,
-                expectrec->fields[i].s);
+                expectrec->fields[i].s
+            );
+            return res;
         }
     }
 
-    return E_sheets_none;
+    return sheetsresult(E_sheets_none, stringZ, "");
 }
 
 int main(int argc, const char **argv)
@@ -79,7 +109,15 @@ int main(int argc, const char **argv)
     fread(content.s, 1, content.len, testf);
     fclose(testf);
     content.s[content.len] = '\0';
-    return csvparse(content, verify, verify, expects);
+
+    sheetsresult result = csvparse(content, verify, verify, expects);
+
+    if (result.code != E_sheets_none) {
+        fprintf(stderr, "error: %s\n", result.msg);
+        exit(EXIT_FAILURE);
+    }
+
+    exit(EXIT_SUCCESS);
 }
 
 // clang-format off

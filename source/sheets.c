@@ -3,13 +3,20 @@
 #include "sheets.h"
 
 #include "strings.h"
+#include <stdio.h>
 
 #define NEWLINE string("\n")
 
-#define returniferr(__expr)      \
-    {                            \
-        int __err = (__expr);    \
-        if (__err) return __err; \
+#define returniferr(__expr)                            \
+    {                                                  \
+        sheetsresult __err = (__expr);                 \
+        if (__err.code != E_sheets_none) return __err; \
+    }
+
+#define sheetsresult(__code, __pos, __msg)               \
+    (sheetsresult)                                       \
+    {                                                    \
+        .code = (__code), .msg = (__msg), .pos = (__pos) \
     }
 
 static inline int hasutf8bom(unsigned char *s)
@@ -29,7 +36,7 @@ static inline int endoffield(
         || field.s[field.len + offset] == fdelim;
 }
 
-static sheetserr takerecord(
+static sheetsresult takerecord(
     string       *table,
     unsigned char rdelim,   // NOLINT bugprone-easily-swappable-parameters
     unsigned char fdelim,   // NOLINT bugprone-easily-swappable-parameters
@@ -47,7 +54,13 @@ static sheetserr takerecord(
         while (!endoffield(field, 0, tablelen, rdelim, fdelim)) {
             if (field.s[field.len] == encloser) {
                 // The encloser is not permitted unless the field is enclosed.
-                if (!enclosed) return E_sheets_unenclosed;
+                if (!enclosed) {
+                    return sheetsresult(
+                        E_sheets_unenclosed,
+                        field,
+                        "unexpected encloser in unenclosed field"
+                    );
+                }
 
                 // If the field is terminal, then we are done.
                 if (endoffield(field, 1, tablelen, rdelim, fdelim)) {
@@ -66,7 +79,13 @@ static sheetserr takerecord(
             field.len++;
         }
 
-        if (unpaired) return E_sheets_unterminated;
+        if (unpaired) {
+            return sheetsresult(
+                E_sheets_unterminated,
+                field,
+                "expected paired encloser at end of the field, but found none"
+            );
+        }
 
         record->fields[record->nfields]  = string(field.s, field.len - enclosed);
         record->enclosed                |= (enclosed << record->nfields);
@@ -77,10 +96,10 @@ static sheetserr takerecord(
         table->len  = tablelen - field.len - 1;
     }
 
-    return E_sheets_none;
+    return sheetsresult(E_sheets_none, stringZ, "");
 }
 
-sheetserr dsvparse(
+sheetsresult dsvparse(
     string        table,
     sheetshandler headerfn, // NOLINT bugprone-easily-swappable-parameters
     sheetshandler recordfn, // NOLINT bugprone-easily-swappable-parameters
@@ -99,7 +118,14 @@ sheetserr dsvparse(
     sheetsrecord record = { 0 };
     int          line   = 1;
     returniferr(takerecord(&table, rdelim, fdelim, encloser, &record));
-    if (record.nfields >= SHEETS_MAX_FIELDS && table.s[0] != rdelim) return E_sheets_numfields;
+    if (record.nfields >= SHEETS_MAX_FIELDS && table.s[0] != rdelim) {
+        return sheetsresult(
+            E_sheets_numfields,
+            stringZ,
+            "number of fields of first row exceeds maximum"
+        );
+    }
+
     if (headerfn) returniferr(headerfn(&record, user, line++));
 
     unsigned long mfields = record.nfields;
@@ -108,19 +134,31 @@ sheetserr dsvparse(
         record.enclosed = 0;
 
         returniferr(takerecord(&table, rdelim, fdelim, encloser, &record));
-        if (record.nfields > mfields && table.s[0] != rdelim) return E_sheets_numfields;
+        if (record.nfields != mfields && table.s[0] != rdelim) {
+            sheetsresult res = sheetsresult(E_sheets_numfields, stringZ, "");
+            snprintf(
+                res.msg,
+                sizeof(res.msg),
+                "record %d - expected %lu fields but found %lu",
+                line,
+                mfields,
+                record.nfields
+            );
+            return res;
+        }
+
         if (recordfn) returniferr(recordfn(&record, user, line++));
     }
 
-    return E_sheets_none;
+    return sheetsresult(E_sheets_none, stringZ, "");
 }
 
-sheetserr csvparse(string table, sheetshandler headerfn, sheetshandler recordfn, void *user)
+sheetsresult csvparse(string table, sheetshandler headerfn, sheetshandler recordfn, void *user)
 {
     return dsvparse(table, headerfn, recordfn, '\n', ',', '"', user);
 }
 
-sheetserr tsvparse(string table, sheetshandler headerfn, sheetshandler recordfn, void *user)
+sheetsresult tsvparse(string table, sheetshandler headerfn, sheetshandler recordfn, void *user)
 {
     return dsvparse(table, headerfn, recordfn, '\n', '\t', '"', user);
 }
