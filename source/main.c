@@ -13,6 +13,7 @@
 
 #include "clip.h"
 #include "config.h"
+#include "fileio.h"
 #include "packer.h"
 #include "sheets.h"
 #include "strings.h"
@@ -66,7 +67,7 @@ static const cfgsection cfgsections[] = {
 
 static void   showusage(FILE *stream);
 static args   parseargs(const char **argv);
-static string fload(const char *filename);
+static string tryfload(const char *filename);
 
 int main(int argc, const char **argv)
 {
@@ -86,8 +87,8 @@ int main(int argc, const char **argv)
     printf("verbose? %s\n", args.verbose ? "yes" : "no");
 #endif // NDEBUG
 
-    string cfgfile = fload(args.config);
-    string csvfile = fload(args.files);
+    string cfgfile = tryfload(args.config);
+    string csvfile = tryfload(args.files);
 
     chdir(args.workdir);
 
@@ -147,22 +148,9 @@ static void showusage(FILE *stream)
     fprintf(stream, "                         during execution to standard-error.\n");
 }
 
-static string fload(const char *filename)
+static string tryfload(const char *filename)
 {
-    FILE *infp = fopen(filename, "rb");
-    if (!infp) die("could not open input file “%s”: %s", filename, strerror(errno));
-
-    fseek(infp, 0, SEEK_END);
-    long fsize = ftell(infp);
-    fseek(infp, 0, SEEK_SET);
-
-    if (fsize < 0) {
-        fclose(infp);
-        die("could not get size of input file “%s”: %s", filename, strerror(errno));
-    }
-
-    string fcont = string(calloc(fsize, 1), fsize);
-    fread(fcont.s, 1, fsize, infp);
-    fclose(infp);
+    string fcont = fload(filename);
+    if (fcont.len < 0) die("could not load input file “%s”: %s", filename, strerror(errno));
     return fcont;
 }

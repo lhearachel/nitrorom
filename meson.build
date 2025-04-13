@@ -19,6 +19,7 @@ clip_dep = declare_dependency(sources: files('source/clip.c'))
 strings_dep = declare_dependency(sources: files('source/strings.c'))
 config_dep = declare_dependency(sources: files('source/config.c'), dependencies: [strings_dep])
 sheets_dep = declare_dependency(sources: files('source/sheets.c'), dependencies: [strings_dep])
+fileio_dep = declare_dependency(sources: files('source/fileio.c'), dependencies: [strings_dep])
 
 executable(
   'nitrorom',
@@ -30,6 +31,7 @@ executable(
   dependencies: [
     clip_dep,
     config_dep,
+    fileio_dep,
     sheets_dep,
     strings_dep,
   ],

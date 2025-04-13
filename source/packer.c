@@ -4,9 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "config.h"
+#include "fileio.h"
 #include "sheets.h"
 #include "strings.h"
 #include "vector.h"
@@ -80,22 +80,6 @@ enum dumperr rompacker_dump(rompacker *packer, FILE *stream)
     return E_dump_ok;
 }
 
-static inline long fsize(const string filename)
-{
-    char cfilename[256] = { 0 };
-    memcpy(cfilename, filename.s, filename.len <= 255 ? filename.len : 255);
-
-    FILE *infp = fopen(cfilename, "rb");
-    if (!infp) return -1;
-
-    fseek(infp, 0, SEEK_END);
-    long fsize = ftell(infp);
-    fseek(infp, 0, SEEK_SET);
-
-    fclose(infp);
-    return fsize;
-}
-
 #define sheetserr(__msg, ...)                                           \
     {                                                                   \
         sheetsresult __res = { .code = E_sheets_user, .pos = stringZ }; \
@@ -122,7 +106,7 @@ sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
     romfile   *file   = push(&packer->filesys, romfile);
     file->source      = record->fields[SOURCE];
     file->target      = record->fields[TARGET];
-    file->size        = fsize(file->source);
+    file->size        = fsizes(file->source);
     file->pad         = -(file->size) & (ROM_ALIGN - 1);
 
     if (file->size < 0) sheetserr("could not open source file “%.*s”", fmtstring(file->source));
