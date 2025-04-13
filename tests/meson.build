@@ -2,7 +2,14 @@ test_clip = executable(
   'test_clip',
   sources: files('test_clip.c'),
   include_directories: public_includes,
-  dependencies: [clip_dep]
+  dependencies: [clip_dep],
+)
+
+test_config = executable(
+  'test_config',
+  sources: files('test_config.c'),
+  include_directories: public_includes,
+  dependencies: [config_dep],
 )
 
 # [suite -> { exe, [(name, args)...] }
@@ -26,6 +33,16 @@ test_suites = {
       ['custom handler - long - same token', ['--handle=custom', 'handle', 'custom']],
       ['flag and string arg - combined short - next token', ['-fs', 'value', 'flag', 'string', 'value']],
       ['flag and string arg - combined short - same token', ['-fsvalue', 'flag', 'string', 'value']],
+    ]
+  },
+  'config': {
+    'exe': test_config,
+    'tests': [
+      ['ok', ['ok', files('config/ok.ini')]],
+      ['missing key', ['nokey', files('config/nokey.ini')]],
+      ['missing section title', ['nosec', files('config/nosec.ini')]],
+      ['unterminated section header', ['untermsec', files('config/untermsec.ini')]],
+      ['unrecognized section header', ['unknownsec', files('config/unknownsec.ini')]],
     ]
   },
 }

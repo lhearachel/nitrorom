@@ -16,6 +16,8 @@ project(
 public_includes = include_directories('include')
 
 clip_dep = declare_dependency(sources: files('source/clip.c'))
+strings_dep = declare_dependency(sources: files('source/strings.c'))
+config_dep = declare_dependency(sources: files('source/config.c'), dependencies: [strings_dep])
 
 executable(
   'nitrorom',
