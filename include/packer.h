@@ -44,6 +44,10 @@ typedef struct rompacker {
     unsigned int hasbannersub   : 1;
     unsigned int hasbannerdev   : 1;
 
+    // rom-wide configuration values
+    unsigned int filltail : 1;
+    unsigned int fillwith : 8;
+
     rommember header;  // intermediate (optional template)
     rommember arm9;    // from disk (required)
     rommember ovt9;    // from disk (optional)

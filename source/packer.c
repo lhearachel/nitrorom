@@ -123,24 +123,6 @@ sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
     return (sheetsresult){ .code = E_sheets_none };
 }
 
-cfgresult cfg_rom(string sec, string key, string val, void *user, long line) // NOLINT
-{
-    (void)sec;
-    (void)line;
-
-    rompacker *packer = user;
-    if (packer->verbose) {
-        fprintf(
-            stderr,
-            "rompacker:configuration:rom “%.*s” -> “%.*s”\n",
-            fmtstring(key),
-            fmtstring(val)
-        );
-    }
-
-    return (cfgresult){ .code = E_config_none };
-}
-
 cfgresult cfg_banner(string sec, string key, string val, void *user, long line) // NOLINT
 {
     (void)sec;

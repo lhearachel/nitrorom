@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #include "packer.h"
 
 #include <stdio.h>
@@ -136,8 +138,8 @@ static cfgresult cfg_header_securecrc(rompacker *packer, string val, long line)
 
     if (result > 0xFFFF) configerr("secure-crc value 0x%08X exceeds maximum of 0xFFFF", result);
 
-    ((unsigned char *)packer->header.source.buf)[OFS_HEADER_SECURECRC]     = (result & 0xFF);
-    ((unsigned char *)packer->header.source.buf)[OFS_HEADER_SECURECRC + 1] = (result >> 8);
+    unsigned char *header = packer->header.source.buf;
+    putlehalf(header + OFS_HEADER_SECURECRC, result);
     if (packer->verbose) {
         fprintf(stderr, "rompacker:configuration:header: set secure CRC to 0x%04X\n", result);
     }
@@ -160,7 +162,6 @@ static const keyvalueparser kvparsers[] = {
 cfgresult cfg_header(string sec, string key, string val, void *user, long line) // NOLINT
 {
     (void)sec;
-
     rompacker *packer = user;
 
     const keyvalueparser *match = &kvparsers[0];
@@ -168,5 +169,5 @@ cfgresult cfg_header(string sec, string key, string val, void *user, long line) 
 
     if (match->parser) return match->parser(packer, val, line);
 
-    configerr("unrecognized header key “%.*s”", fmtstring(key));
+    configerr("unrecognized header-section key “%.*s”", fmtstring(key));
 }

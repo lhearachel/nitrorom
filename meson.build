@@ -25,6 +25,7 @@ executable(
   'nitrorom',
   sources: files(
     'source/cfgparse/cfg_header.c',
+    'source/cfgparse/cfg_rom.c',
     'source/main.c',
     'source/packer.c',
   ),
