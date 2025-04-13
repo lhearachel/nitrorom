@@ -22,10 +22,16 @@ sheets_dep = declare_dependency(sources: files('source/sheets.c'), dependencies:
 
 executable(
   'nitrorom',
-  sources: files('source/main.c'),
+  sources: files(
+    'source/main.c',
+    'source/packer.c',
+  ),
   include_directories: public_includes,
   dependencies: [
     clip_dep,
+    config_dep,
+    sheets_dep,
+    strings_dep,
   ],
 )
 

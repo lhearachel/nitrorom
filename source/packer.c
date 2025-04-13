@@ -1,0 +1,196 @@
+// SPDX-License-Identifier: MIT
+
+#include "packer.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "config.h"
+#include "sheets.h"
+#include "strings.h"
+#include "vector.h"
+
+#define HEADER_BSIZE 0x4000
+
+rompacker *rompacker_new(unsigned int verbose)
+{
+    rompacker *packer = calloc(1, sizeof(*packer));
+    if (!packer) return 0;
+
+    packer->packing = 1;
+    packer->verbose = verbose;
+
+    // The header is the only constant-size element in the entire ROM, so we
+    // can pre-allocate it.
+    packer->header.source.size = HEADER_BSIZE;
+    packer->header.source.buf  = calloc(HEADER_BSIZE, 1);
+
+    packer->ovy9    = newvec(rommember, 128);
+    packer->ovy7    = newvec(rommember, 128);
+    packer->filesys = newvec(romfile, 128);
+
+    return packer;
+}
+
+static inline void safeclose(FILE *f)
+{
+    if (f) fclose(f);
+}
+
+void rompacker_del(rompacker *packer)
+{
+    free(packer->header.source.buf);
+    free(packer->banner.source.buf);
+    free(packer->fntb.source.buf);
+    free(packer->fatb.source.buf);
+    free(packer->ovy9.data);
+    free(packer->ovy7.data);
+    free(packer->filesys.data);
+
+    safeclose(packer->arm9.source.hdl);
+    safeclose(packer->ovt9.source.hdl);
+    safeclose(packer->arm7.source.hdl);
+    safeclose(packer->ovt7.source.hdl);
+
+    free(packer);
+}
+
+void rompacker_seal(rompacker *packer)
+{
+    if (packer->verbose) fprintf(stderr, "rompacker: sealing the packer...\n");
+
+    packer->packing = 0;
+    // TODO: Compute FNTB
+    // TODO: Compute FATB
+    // TODO: Update offsets in packer header
+    // TODO: Compute CRCs in header and banner
+
+    if (packer->verbose) fprintf(stderr, "rompacker: packer is sealed, okay to dump!\n");
+}
+
+enum dumperr rompacker_dump(rompacker *packer, FILE *stream)
+{
+    if (packer->verbose) fprintf(stderr, "rompacker: dumping contents to disk!\n");
+    if (packer->packing) return E_dump_packing;
+    if (!stream) return E_dump_nullfile;
+
+    // TODO: Write members to stream
+    return E_dump_ok;
+}
+
+sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
+{
+    if (record->nfields != 2) {
+        sheetsresult res = { .code = E_sheets_user, .pos = stringZ };
+        snprintf(
+            res.msg,
+            sizeof(res.msg),
+            "rompacker:filesystem:%d: expected 2 fields for record, but found %lu",
+            line,
+            record->nfields
+        );
+        return res;
+    }
+
+    rompacker *packer = user;
+    if (packer->verbose) {
+        fprintf(
+            stderr,
+            "rompacker:filesystem:“%.*s” -> “%.*s”\n",
+            fmtstring(record->fields[0]),
+            fmtstring(record->fields[1])
+        );
+    }
+
+    return (sheetsresult){ .code = E_sheets_none };
+}
+
+cfgresult cfg_header(string sec, string key, string val, void *user, long line) // NOLINT
+{
+    (void)sec;
+    (void)line;
+
+    rompacker *packer = user;
+    if (packer->verbose) {
+        fprintf(
+            stderr,
+            "rompacker:configuration:header “%.*s” -> “%.*s”\n",
+            fmtstring(key),
+            fmtstring(val)
+        );
+    }
+
+    return (cfgresult){ .code = E_config_none };
+}
+
+cfgresult cfg_rom(string sec, string key, string val, void *user, long line) // NOLINT
+{
+    (void)sec;
+    (void)line;
+
+    rompacker *packer = user;
+    if (packer->verbose) {
+        fprintf(
+            stderr,
+            "rompacker:configuration:rom “%.*s” -> “%.*s”\n",
+            fmtstring(key),
+            fmtstring(val)
+        );
+    }
+
+    return (cfgresult){ .code = E_config_none };
+}
+
+cfgresult cfg_banner(string sec, string key, string val, void *user, long line) // NOLINT
+{
+    (void)sec;
+    (void)line;
+
+    rompacker *packer = user;
+    if (packer->verbose) {
+        fprintf(
+            stderr,
+            "rompacker:configuration:banner “%.*s” -> “%.*s”\n",
+            fmtstring(key),
+            fmtstring(val)
+        );
+    }
+
+    return (cfgresult){ .code = E_config_none };
+}
+
+cfgresult cfg_arm9(string sec, string key, string val, void *user, long line) // NOLINT
+{
+    (void)sec;
+    (void)line;
+
+    rompacker *packer = user;
+    if (packer->verbose) {
+        fprintf(
+            stderr,
+            "rompacker:configuration:arm9 “%.*s” -> “%.*s”\n",
+            fmtstring(key),
+            fmtstring(val)
+        );
+    }
+
+    return (cfgresult){ .code = E_config_none };
+}
+
+cfgresult cfg_arm7(string sec, string key, string val, void *user, long line) // NOLINT
+{
+    (void)sec;
+    (void)line;
+
+    rompacker *packer = user;
+    if (packer->verbose) {
+        fprintf(
+            stderr,
+            "rompacker:configuration:arm7 “%.*s” -> “%.*s”\n",
+            fmtstring(key),
+            fmtstring(val)
+        );
+    }
+
+    return (cfgresult){ .code = E_config_none };
+}
