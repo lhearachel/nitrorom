@@ -6,13 +6,11 @@
 #include <stdlib.h>
 
 #include "config.h"
+#include "constants.h"
 #include "fileio.h"
 #include "sheets.h"
 #include "strings.h"
 #include "vector.h"
-
-#define HEADER_BSIZE 0x4000
-#define ROM_ALIGN    0x200
 
 rompacker *rompacker_new(unsigned int verbose)
 {
@@ -123,24 +121,6 @@ sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
     }
 
     return (sheetsresult){ .code = E_sheets_none };
-}
-
-cfgresult cfg_header(string sec, string key, string val, void *user, long line) // NOLINT
-{
-    (void)sec;
-    (void)line;
-
-    rompacker *packer = user;
-    if (packer->verbose) {
-        fprintf(
-            stderr,
-            "rompacker:configuration:header “%.*s” -> “%.*s”\n",
-            fmtstring(key),
-            fmtstring(val)
-        );
-    }
-
-    return (cfgresult){ .code = E_config_none };
 }
 
 cfgresult cfg_rom(string sec, string key, string val, void *user, long line) // NOLINT

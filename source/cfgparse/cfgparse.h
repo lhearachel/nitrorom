@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: MIT
+
+#ifndef CFGPARSE_H
+#define CFGPARSE_H
+
+#include "config.h"
+#include "packer.h"
+#include "strings.h"
+
+#define configerr(__msg, ...)                                        \
+    {                                                                \
+        cfgresult __res = { .code = E_config_user, .pos = stringZ }; \
+        snprintf(                                                    \
+            (__res).msg,                                             \
+            sizeof(__res).msg,                                       \
+            "rompacker:configuration:%ld: " __msg,                   \
+            line,                                                    \
+            __VA_ARGS__                                              \
+        );                                                           \
+        return __res;                                                \
+    }
+
+#define configok              \
+    (cfgresult)               \
+    {                         \
+        .code = E_config_none \
+    }
+
+typedef cfgresult (*valueparser)(rompacker *packer, string val, long line);
+
+typedef struct keyvalueparser {
+    string      key;
+    valueparser parser;
+} keyvalueparser;
+
+#endif // CFGPARSE_H
