@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "clip.h"
 #include "config.h"
@@ -33,10 +34,13 @@
         exit(EXIT_FAILURE);                  \
     }
 
-#define dieiferr(__cond, __resT, __msg)             \
-    {                                               \
-        __resT __res = __cond;                      \
-        if (__res.code != 0) die(__msg, __res.msg); \
+#define dieiferr(__cond, __resT)                \
+    {                                           \
+        __resT __res = __cond;                  \
+        if (__res.code != 0) {                  \
+            fprintf(stderr, "%s\n", __res.msg); \
+            exit(EXIT_FAILURE);                 \
+        }                                       \
     }
 
 typedef struct args {
@@ -85,10 +89,11 @@ int main(int argc, const char **argv)
     string cfgfile = fload(args.config);
     string csvfile = fload(args.files);
 
-    rompacker *packer = rompacker_new((unsigned int)args.verbose);
+    chdir(args.workdir);
 
-    dieiferr(cfgparse(cfgfile, cfgsections, packer), cfgresult, "config error - %s");
-    dieiferr(csvparse(csvfile, NULL, csv_addfile, packer), sheetsresult, "sheets error - %s");
+    rompacker *packer = rompacker_new((unsigned int)args.verbose);
+    dieiferr(cfgparse(cfgfile, cfgsections, packer), cfgresult);
+    dieiferr(csvparse(csvfile, NULL, csv_addfile, packer), sheetsresult);
 
     rompacker_seal(packer);
     rompacker_dump(packer, NULL); // TODO:

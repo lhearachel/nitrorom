@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
 #include "sheets.h"
@@ -11,6 +12,7 @@
 #include "vector.h"
 
 #define HEADER_BSIZE 0x4000
+#define ROM_ALIGN    0x200
 
 rompacker *rompacker_new(unsigned int verbose)
 {
@@ -27,7 +29,7 @@ rompacker *rompacker_new(unsigned int verbose)
 
     packer->ovy9    = newvec(rommember, 128);
     packer->ovy7    = newvec(rommember, 128);
-    packer->filesys = newvec(romfile, 128);
+    packer->filesys = newvec(romfile, 512);
 
     return packer;
 }
@@ -78,27 +80,61 @@ enum dumperr rompacker_dump(rompacker *packer, FILE *stream)
     return E_dump_ok;
 }
 
+static inline long fsize(const string filename)
+{
+    char cfilename[256] = { 0 };
+    memcpy(cfilename, filename.s, filename.len <= 255 ? filename.len : 255);
+
+    FILE *infp = fopen(cfilename, "rb");
+    if (!infp) return -1;
+
+    fseek(infp, 0, SEEK_END);
+    long fsize = ftell(infp);
+    fseek(infp, 0, SEEK_SET);
+
+    fclose(infp);
+    return fsize;
+}
+
+#define sheetserr(__msg, ...)                                           \
+    {                                                                   \
+        sheetsresult __res = { .code = E_sheets_user, .pos = stringZ }; \
+        snprintf(                                                       \
+            (__res).msg,                                                \
+            sizeof(__res).msg,                                          \
+            "rompacker:filesystem:%d: " __msg,                          \
+            line,                                                       \
+            __VA_ARGS__                                                 \
+        );                                                              \
+        return __res;                                                   \
+    }
+
+#define SOURCE 0
+#define TARGET 1
+
 sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
 {
     if (record->nfields != 2) {
-        sheetsresult res = { .code = E_sheets_user, .pos = stringZ };
-        snprintf(
-            res.msg,
-            sizeof(res.msg),
-            "rompacker:filesystem:%d: expected 2 fields for record, but found %lu",
-            line,
-            record->nfields
-        );
-        return res;
+        sheetserr("expected 2 fields for record, but found %lu", record->nfields);
     }
 
     rompacker *packer = user;
+    romfile   *file   = push(&packer->filesys, romfile);
+    file->source      = record->fields[SOURCE];
+    file->target      = record->fields[TARGET];
+    file->size        = fsize(file->source);
+    file->pad         = -(file->size) & (ROM_ALIGN - 1);
+
+    if (file->size < 0) sheetserr("could not open source file “%.*s”", fmtstring(file->source));
+
     if (packer->verbose) {
         fprintf(
             stderr,
-            "rompacker:filesystem:“%.*s” -> “%.*s”\n",
-            fmtstring(record->fields[0]),
-            fmtstring(record->fields[1])
+            "rompacker:filesystem: 0x%08lX,0x%08lX,%.*s,%.*s\n",
+            file->size,
+            file->pad,
+            fmtstring(file->source),
+            fmtstring(file->target)
         );
     }
 
