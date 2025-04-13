@@ -12,6 +12,13 @@ test_config = executable(
   dependencies: [config_dep],
 )
 
+test_sheets = executable(
+  'test_sheets',
+  sources: files('test_sheets.c'),
+  include_directories: public_includes,
+  dependencies: [sheets_dep],
+)
+
 # [suite -> { exe, [(name, args)...] }
 test_suites = {
   'clip': {
@@ -44,6 +51,14 @@ test_suites = {
       ['unterminated section header', ['untermsec', files('config/untermsec.ini')]],
       ['unrecognized section header', ['unknownsec', files('config/unknownsec.ini')]],
     ]
+  },
+  'sheets': {
+    'exe': test_sheets,
+    'tests': [
+      ['one row', ['onerow', files('sheets/onerow.csv')]],
+      ['two rows', ['tworows', files('sheets/tworows.csv')]],
+      ['enclosed', ['enclosed', files('sheets/enclosed.csv')]],
+    ],
   },
 }
 
