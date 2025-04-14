@@ -3,6 +3,7 @@
 #ifndef PACKER_H
 #define PACKER_H
 
+#include <stdint.h>
 #include <stdio.h>
 
 #include "config.h"
@@ -28,10 +29,12 @@ typedef struct rommember {
 // We don't maintain file-handles for filesystem members as the upper-bound of filesystem members
 // supported by the DS is quite large (61440).
 typedef struct romfile {
-    string source;
-    string target;
-    long   size;
-    long   pad;
+    string   source;
+    string   target;
+    long     size;
+    int      pad;
+    uint16_t filesysid;
+    uint16_t packingid;
 } romfile;
 
 typedef struct rompacker {

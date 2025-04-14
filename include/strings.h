@@ -60,4 +60,9 @@ int strequ(const string a, const string b);
  */
 int strnequ(const string a, const string b, long n);
 
+/*
+ * Evaluate a case-insensitive comparison between two strings.
+ */
+int stricmp(const string a, const string b);
+
 #endif // STRINGS_H

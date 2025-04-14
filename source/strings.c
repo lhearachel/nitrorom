@@ -60,3 +60,18 @@ int strnequ(const string a, const string b, long n) // NOLINT
     n = n < a.len && n < b.len ? n : min(a.len, b.len);
     return _strnequ(a, b, n);
 }
+
+#define lower(__c) (((__c) >= 'A' && (__c) <= 'Z') ? (__c) + ('a' - 'A') : (__c))
+
+int stricmp(const string a, const string b)
+{
+    long n = min(a.len, b.len);
+    long i = 0;
+    for (; i < n && lower(a.s[i]) == lower(b.s[i]); i++);
+
+    unsigned char ac = lower(a.s[i]);
+    unsigned char bc = lower(b.s[i]);
+
+    // 0 if equal, -1 if a is lesser, 1 if b is lesser
+    return i == n ? ac != bc : ac < bc ? -1 : 1;
+}
