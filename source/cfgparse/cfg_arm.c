@@ -126,7 +126,7 @@ static cfgresult cfg_arm9_definitions(rompacker *packer, string val, long line)
 
 static cfgresult cfg_arm9_overlaytable(rompacker *packer, string val, long line)
 {
-    return cfg_arm_prepfile(packer, &packer->ovt7, val, line, "arm9", "overlay table");
+    return cfg_arm_prepfile(packer, &packer->ovt9, val, line, "arm9", "overlay table");
 }
 
 static cfgresult cfg_arm7_staticbinary(rompacker *packer, string val, long line)
