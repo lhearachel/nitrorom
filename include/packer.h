@@ -39,10 +39,11 @@ typedef struct rompacker {
     unsigned int verbose : 1; // if 1, emit verbose logs during packing
 
     // basic sanity-checks for setting banner components
-    unsigned int hasbannerver   : 1; // DSi banners are larger, so need a version to properly alloc
+    unsigned int bannerver      : 2;
     unsigned int hasbannertitle : 1;
     unsigned int hasbannersub   : 1;
     unsigned int hasbannerdev   : 1;
+    unsigned int endbannertitle : 16;
 
     // rom-wide configuration values
     unsigned int filltail : 1;

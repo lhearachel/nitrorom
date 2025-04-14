@@ -15,7 +15,7 @@
             sizeof(__res).msg,                                       \
             "rompacker:configuration:%ld: " __msg,                   \
             line,                                                    \
-            __VA_ARGS__                                              \
+            ##__VA_ARGS__                                            \
         );                                                           \
         return __res;                                                \
     }

@@ -25,6 +25,11 @@ rompacker *rompacker_new(unsigned int verbose)
     packer->header.source.size = HEADER_BSIZE;
     packer->header.source.buf  = calloc(HEADER_BSIZE, 1);
 
+    // Technically, DSi-mode banners support an alternate size. That is a problem for the future.
+    packer->banner.source.size = BANNER_BSIZE;
+    packer->banner.source.buf  = calloc(BANNER_BSIZE, 1);
+    packer->banner.pad         = -BANNER_BSIZE & (ROM_ALIGN - 1);
+
     packer->ovy9    = newvec(rommember, 128);
     packer->ovy7    = newvec(rommember, 128);
     packer->filesys = newvec(romfile, 512);
@@ -121,24 +126,6 @@ sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
     }
 
     return (sheetsresult){ .code = E_sheets_none };
-}
-
-cfgresult cfg_banner(string sec, string key, string val, void *user, long line) // NOLINT
-{
-    (void)sec;
-    (void)line;
-
-    rompacker *packer = user;
-    if (packer->verbose) {
-        fprintf(
-            stderr,
-            "rompacker:configuration:banner “%.*s” -> “%.*s”\n",
-            fmtstring(key),
-            fmtstring(val)
-        );
-    }
-
-    return (cfgresult){ .code = E_config_none };
 }
 
 cfgresult cfg_arm9(string sec, string key, string val, void *user, long line) // NOLINT
