@@ -22,4 +22,6 @@
         (__dest)[1] = ((__half) >> 8) & 0xFF; \
     }
 
+#define lehalf(__src) ((__src)[0] | ((__src)[1] << 8))
+
 #endif // LITEND_H

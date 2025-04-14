@@ -83,7 +83,7 @@ sheetsresult csv_addfile(sheetsrecord *record, void *packer, int line);
 
 rompacker   *rompacker_new(unsigned int verbose);
 void         rompacker_del(rompacker *packer);
-void         rompacker_seal(rompacker *packer);
+int          rompacker_seal(rompacker *packer);
 enum dumperr rompacker_dump(rompacker *packer, FILE *stream);
 
 #endif // PACKER_H

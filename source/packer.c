@@ -15,6 +15,7 @@
 #include "strings.h"
 #include "vector.h"
 
+#define OFS_HEADER_CHIPCAPACITY     0x014
 #define OFS_HEADER_ARM9_ROMOFFSET   0x020
 #define OFS_HEADER_ARM7_ROMOFFSET   0x030
 #define OFS_HEADER_FNTB_ROMOFFSET   0x040
@@ -26,6 +27,14 @@
 #define OFS_HEADER_OVT7_ROMOFFSET   0x058
 #define OFS_HEADER_OVT7_BSIZE       0x05C
 #define OFS_HEADER_BANNER_ROMOFFSET 0x068
+#define OFS_HEADER_ROMSIZE          0x080
+#define OFS_HEADER_HEADERSIZE       0x084
+#define OFS_HEADER_STATICFOOTER     0x088
+#define OFS_HEADER_HEADERCRC        0x15E
+
+#define OFS_BANNER_CRC_V1OFFSET 0x002
+#define OFS_BANNER_CRC_V2OFFSET 0x004
+#define OFS_BANNER_CRC_V3OFFSET 0x006
 
 rompacker *rompacker_new(unsigned int verbose)
 {
@@ -72,6 +81,36 @@ void rompacker_del(rompacker *packer)
     safeclose(packer->ovt7.source.hdl);
 
     free(packer);
+}
+
+static uint16_t crctable[16] = {
+    0x0000, 0xCC01, 0xD801, 0x1400, 0xF001, 0x3C00, 0x2800, 0xE401,
+    0xA001, 0x6C00, 0x7800, 0xB401, 0x5000, 0x9C01, 0x8801, 0x4400,
+};
+
+static uint16_t crc16(string data, uint16_t crc)
+{
+    const unsigned char *end = data.s + data.len;
+
+    uint16_t x = 0;
+    uint16_t y;
+    uint16_t bit = 0;
+    while (data.s < end) {
+        if (bit == 0) x = lehalf(data.s);
+
+        y     = crctable[crc & 15];
+        crc >>= 4;
+        crc  ^= y;
+        crc  ^= crctable[(x >> bit) & 15];
+        bit  += 4;
+
+        if (bit == 16) {
+            data.s += 2;
+            bit     = 0;
+        }
+    }
+
+    return crc;
 }
 
 static int comparefnames(const void *a, const void *b) // NOLINT
@@ -180,7 +219,65 @@ static void sealfntb(rompacker *packer, romfile *sorted, uint32_t fileid)
     packer->fntb.pad             = 0x4C;
 }
 
-void rompacker_seal(rompacker *packer)
+static int sealheader(rompacker *packer, uint32_t romsize)
+{
+    unsigned char *header = packer->header.source.buf;
+
+    uint32_t trycap = 0x00020000;
+    int      shift  = 0;
+    for (; shift < 15; shift++) {
+        if (romsize < (trycap << shift)) {
+            header[OFS_HEADER_CHIPCAPACITY] = shift;
+            break;
+        }
+    }
+
+    // ROM size exceeds the maximum; main thread should die from here
+    if (shift == 15) return 1;
+
+    putleword(header + OFS_HEADER_ROMSIZE, romsize);
+    putleword(header + OFS_HEADER_HEADERSIZE, HEADER_BSIZE);
+    putleword(header + OFS_HEADER_STATICFOOTER, 0x00004BA0); // static NitroSDK footer
+
+    uint16_t crc = crc16(string(header, HEADER_BSIZE), 0xFFFF);
+    if (packer->verbose) fprintf(stderr, "rompacker: header CRC: 0x%04X\n", crc);
+    putlehalf(header + OFS_HEADER_HEADERCRC, crc);
+
+    if (packer->verbose) {
+        fprintf(
+            stderr,
+            "rompacker: storage: 0x%08X used / 0x%08X avail (%f%%)\n",
+            romsize,
+            (trycap << shift),
+            romsize / (double)(trycap << shift)
+        );
+    }
+
+    return 0;
+}
+
+static void sealbanner(rompacker *packer)
+{
+    unsigned char *banner = packer->banner.source.buf;
+
+    uint16_t crc = crc16(string(banner + 0x20, BANNER_BSIZE_V1 - 0x20), 0xFFFF);
+    putleword(banner + OFS_BANNER_CRC_V1OFFSET, crc);
+    if (packer->verbose) fprintf(stderr, "rompacker: banner v1 CRC: 0x%04X\n", crc);
+
+    if (packer->bannerver > 1) {
+        crc = crc16(string(banner + 0x20, BANNER_BSIZE_V2 - 0x20), 0xFFFF);
+        putleword(banner + OFS_BANNER_CRC_V2OFFSET, crc);
+        if (packer->verbose) fprintf(stderr, "rompacker: banner v2 CRC: 0x%04X\n", crc);
+    }
+
+    if (packer->bannerver > 2) {
+        crc = crc16(string(banner + 0x20, BANNER_BSIZE_V3 - 0x20), 0xFFFF);
+        putleword(banner + OFS_BANNER_CRC_V3OFFSET, crc);
+        if (packer->verbose) fprintf(stderr, "rompacker: banner v3 CRC: 0x%04X\n", crc);
+    }
+}
+
+int rompacker_seal(rompacker *packer)
 {
     if (packer->verbose) fprintf(stderr, "rompacker: sealing the packer...\n");
 
@@ -231,9 +328,19 @@ void rompacker_seal(rompacker *packer)
         romcursor += filesize(topack);
     }
 
-    // TODO: Compute CRCs for header and banner
+    // Final ROM size must ignore the padding of the last-added member (either the banner or the
+    // last filesystem entry).
+    uint32_t romsize = romcursor;
+    if (packer->filesys.len > 0) {
+        romsize -= get(&packer->filesys, romfile, packer->filesys.len - 1)->pad;
+    } else {
+        romsize -= packer->banner.pad;
+    }
 
+    sealbanner(packer);
+    int result = sealheader(packer, romsize);
     if (packer->verbose) fprintf(stderr, "rompacker: packer is sealed, okay to dump!\n");
+    return result;
 }
 
 enum dumperr rompacker_dump(rompacker *packer, FILE *stream)

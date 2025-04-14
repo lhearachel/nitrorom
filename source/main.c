@@ -18,12 +18,12 @@
 #include "sheets.h"
 #include "strings.h"
 
-#define die(__msg, ...)                      \
-    {                                        \
-        fputs("nitrorom: ", stderr);         \
-        fprintf(stderr, __msg, __VA_ARGS__); \
-        fputc('\n', stderr);                 \
-        exit(EXIT_FAILURE);                  \
+#define die(__msg, ...)                        \
+    {                                          \
+        fputs("nitrorom: ", stderr);           \
+        fprintf(stderr, __msg, ##__VA_ARGS__); \
+        fputc('\n', stderr);                   \
+        exit(EXIT_FAILURE);                    \
     }
 
 #define dieusage(__msg, ...)                 \
@@ -96,7 +96,10 @@ int main(int argc, const char **argv)
     dieiferr(cfgparse(cfgfile, cfgsections, packer), cfgresult);
     dieiferr(csvparse(csvfile, NULL, csv_addfile, packer), sheetsresult);
 
-    rompacker_seal(packer);
+    if (rompacker_seal(packer) != 0) {
+        die("computed ROM size exceeds allowable maximum of 0x80000000!\n");
+    }
+
     rompacker_dump(packer, NULL); // TODO:
     rompacker_del(packer);
     exit(EXIT_SUCCESS);
