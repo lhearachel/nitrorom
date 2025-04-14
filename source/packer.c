@@ -193,8 +193,8 @@ static void sealarm(
     *romcursor = *romcursor + membsize(arm);
 
     if (verbose) printmemb(*romcursor, ovt);
-    putleword(header + ofsovtrom, *romcursor);
-    putleword(header + ofsovtsize, *romcursor);
+    putleword(header + ofsovtrom, ovt->source.size > 0 ? *romcursor : 0);
+    putleword(header + ofsovtsize, ovt->source.size);
     *romcursor = *romcursor + membsize(ovt);
 
     for (int i = 0, j = ovyofs; i < ovyvec->len; i++, j++) {
