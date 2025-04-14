@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "config.h"
 #include "constants.h"
 #include "fileio.h"
 #include "sheets.h"
@@ -20,12 +19,11 @@ rompacker *rompacker_new(unsigned int verbose)
     packer->packing = 1;
     packer->verbose = verbose;
 
-    // The header is the only constant-size element in the entire ROM, so we
-    // can pre-allocate it.
+    // The header is the only constant-size element in the entire ROM, so we can pre-allocate it.
     packer->header.source.size = HEADER_BSIZE;
     packer->header.source.buf  = calloc(HEADER_BSIZE, 1);
 
-    // Technically, DSi-mode banners support an alternate size. That is a problem for the future.
+    // TODO: DSi-mode is not yet supported, so we can pre-allocate the constant banner size.
     packer->banner.source.size = BANNER_BSIZE;
     packer->banner.source.buf  = calloc(BANNER_BSIZE, 1);
     packer->banner.pad         = -BANNER_BSIZE & (ROM_ALIGN - 1);
@@ -44,6 +42,10 @@ static inline void safeclose(FILE *f)
 
 void rompacker_del(rompacker *packer)
 {
+    // These are allocated by `cfg_overlays` in `cfg_arm.c`.
+    if (packer->ovy9.len > 0) free(get(&packer->ovy9, rommember, 0)->source.filename.s);
+    if (packer->ovy7.len > 0) free(get(&packer->ovy7, rommember, 0)->source.filename.s);
+
     free(packer->header.source.buf);
     free(packer->banner.source.buf);
     free(packer->fntb.source.buf);
@@ -126,40 +128,4 @@ sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
     }
 
     return (sheetsresult){ .code = E_sheets_none };
-}
-
-cfgresult cfg_arm9(string sec, string key, string val, void *user, long line) // NOLINT
-{
-    (void)sec;
-    (void)line;
-
-    rompacker *packer = user;
-    if (packer->verbose) {
-        fprintf(
-            stderr,
-            "rompacker:configuration:arm9 “%.*s” -> “%.*s”\n",
-            fmtstring(key),
-            fmtstring(val)
-        );
-    }
-
-    return (cfgresult){ .code = E_config_none };
-}
-
-cfgresult cfg_arm7(string sec, string key, string val, void *user, long line) // NOLINT
-{
-    (void)sec;
-    (void)line;
-
-    rompacker *packer = user;
-    if (packer->verbose) {
-        fprintf(
-            stderr,
-            "rompacker:configuration:arm7 “%.*s” -> “%.*s”\n",
-            fmtstring(key),
-            fmtstring(val)
-        );
-    }
-
-    return (cfgresult){ .code = E_config_none };
 }
