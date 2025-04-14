@@ -10,6 +10,7 @@
 #include "cfgparse.h"
 #include "config.h"
 #include "fileio.h"
+#include "litend.h"
 #include "strings.h"
 
 #define ICON_BITMAP_DIMEN  32

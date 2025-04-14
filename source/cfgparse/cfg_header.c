@@ -10,6 +10,7 @@
 #include "config.h"
 #include "constants.h"
 #include "fileio.h"
+#include "litend.h"
 #include "strings.h"
 
 #define LEN_HEADER_TITLE  12

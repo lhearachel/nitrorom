@@ -8,6 +8,7 @@
 
 #include "cfgparse.h"
 #include "config.h"
+#include "litend.h"
 #include "strings.h"
 
 #define ST_MROM 0x051E
