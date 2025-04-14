@@ -224,7 +224,7 @@ static int sealheader(rompacker *packer, uint32_t romsize)
     unsigned char *header = packer->header.source.buf;
 
     uint32_t trycap = 0x00020000;
-    int      shift  = 0;
+    int      shift  = 0; // TODO: Enforce a different maximum capacity-shift for MROM storage
     for (; shift < 15; shift++) {
         if (romsize < (trycap << shift)) {
             header[OFS_HEADER_CHIPCAPACITY] = shift;
