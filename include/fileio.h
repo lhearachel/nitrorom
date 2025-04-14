@@ -47,4 +47,9 @@ file fprep(const char *filename);
  */
 file fpreps(const string filename);
 
+/*
+ * Dump file contents to a file on-disk.
+ */
+void fdump(const char *filename, const void *buf, const long bufsize);
+
 #endif // FILEIO_H

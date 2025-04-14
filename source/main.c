@@ -69,6 +69,8 @@ static void   showusage(FILE *stream);
 static args   parseargs(const char **argv);
 static string tryfload(const char *filename);
 
+#define dumpargs(__memb) (__memb).source.buf, (__memb).source.size
+
 int main(int argc, const char **argv)
 {
     if (argc <= 1 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--help", 6) == 0) {
@@ -100,7 +102,15 @@ int main(int argc, const char **argv)
         die("computed ROM size exceeds allowable maximum of 0x80000000!\n");
     }
 
-    rompacker_dump(packer, NULL); // TODO:
+    if (args.dryrun) {
+        fdump("header.sbin", dumpargs(packer->header));
+        fdump("banner.sbin", dumpargs(packer->banner));
+        fdump("fntb.sbin", dumpargs(packer->fntb));
+        fdump("fatb.sbin", dumpargs(packer->fatb));
+    } else {
+        rompacker_dump(packer, NULL); // TODO:
+    }
+
     rompacker_del(packer);
     exit(EXIT_SUCCESS);
 }

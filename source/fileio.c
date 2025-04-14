@@ -78,3 +78,12 @@ file fpreps(const string filename)
 {
     wrapsfn(fprep);
 }
+
+void fdump(const char *filename, const void *buf, const long bufsize)
+{
+    FILE *outfp = fopen(filename, "wb");
+    if (!outfp) return;
+
+    fwrite(buf, 1, bufsize, outfp);
+    fclose(outfp);
+}
