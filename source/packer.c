@@ -40,12 +40,6 @@ rompacker *rompacker_new(unsigned int verbose)
     packer->header.source.size     = HEADER_BSIZE;
     packer->header.source.buf      = calloc(HEADER_BSIZE, 1);
 
-    // TODO: DSi-mode is not yet supported, so we can pre-allocate the constant banner size.
-    packer->banner.source.filename = string("%BANNER%");
-    packer->banner.source.size     = BANNER_BSIZE;
-    packer->banner.source.buf      = calloc(BANNER_BSIZE, 1);
-    packer->banner.pad             = -BANNER_BSIZE & (ROM_ALIGN - 1);
-
     packer->ovy9    = newvec(rommember, 128);
     packer->ovy7    = newvec(rommember, 128);
     packer->filesys = newvec(romfile, 512);

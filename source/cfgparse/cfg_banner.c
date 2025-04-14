@@ -9,6 +9,7 @@
 
 #include "cfgparse.h"
 #include "config.h"
+#include "constants.h"
 #include "fileio.h"
 #include "litend.h"
 #include "strings.h"
@@ -50,12 +51,21 @@ static cfgresult cfg_banner_version(rompacker *packer, string val, long line)
         result += digit;
     }
 
-    if (result == 0 || result > 3) {
-        configerr("expected banner version to be 1, 2, or 3, but found %d", result);
+    long bannersize;
+    switch (result) {
+    case 1:  bannersize = BANNER_BSIZE_V1; break;
+    case 2:  bannersize = BANNER_BSIZE_V2; break;
+    case 3:  bannersize = BANNER_BSIZE_V3; break;
+    default: configerr("expected banner version to be 1, 2, or 3, but found %d", result);
     }
 
+    packer->bannerver              = result;
+    packer->banner.source.filename = string("%BANNER%");
+    packer->banner.source.size     = bannersize;
+    packer->banner.pad             = -bannersize & (ROM_ALIGN - 1);
+    packer->banner.source.buf      = calloc(bannersize, 1);
+
     unsigned char *banner = packer->banner.source.buf;
-    packer->bannerver     = result;
     banner[0]             = result;
     if (packer->verbose) {
         fprintf(stderr, "rompacker:configuration:banner: set version to %d\n", result);
@@ -293,7 +303,10 @@ cfgresult cfg_banner(string sec, string key, string val, void *user, long line) 
     const keyvalueparser *match = &kvparsers[0];
     for (; match->parser != NULL && !strequ(key, match->key); match++);
 
-    if (match->parser) return match->parser(packer, val, line);
+    if (!match->parser) configerr("unrecognized banner-section key “%.*s”", fmtstring(key));
+    if (!packer->banner.source.buf && !strequ(string("version"), match->key)) {
+        configerr("attempted to set banner-section value before specifying the version");
+    }
 
-    configerr("unrecognized banner-section key “%.*s”", fmtstring(key));
+    return match->parser(packer, val, line);
 }
