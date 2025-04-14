@@ -8,7 +8,14 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
+#include <stdio.h>
+
 #include "strings.h"
+
+typedef struct file {
+    FILE *hdl;
+    long  size;
+} file;
 
 /*
  * Load the contents of a file into memory.
@@ -29,5 +36,15 @@ long fsize(const char *filename);
  * Get the size of a file from disk. `fsize`-wrapper for `string` filenames.
  */
 long fsizes(const string filename);
+
+/*
+ * Prepare a file-handle for consumption by other processes.
+ */
+file fprep(const char *filename);
+
+/*
+ * Prepare a file-handle for consumption by other processes. `fprep`-wrapper for `string` filenames.
+ */
+file fpreps(const string filename);
 
 #endif // FILEIO_H

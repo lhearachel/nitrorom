@@ -6,15 +6,28 @@
 
 #include "strings.h"
 
+static inline long priv_fsize(FILE *infp)
+{
+    fseek(infp, 0, SEEK_END);
+    long fsize = ftell(infp);
+    fseek(infp, 0, SEEK_SET);
+
+    return fsize;
+}
+
+#define wrapsfn(__cfn)                                                           \
+    {                                                                            \
+        char cfilename[256] = { 0 };                                             \
+        memcpy(cfilename, filename.s, filename.len <= 255 ? filename.len : 255); \
+        return __cfn(cfilename);                                                 \
+    }
+
 string fload(const char *filename)
 {
     FILE *infp = fopen(filename, "rb");
     if (!infp) return string(NULL, -1);
 
-    fseek(infp, 0, SEEK_END);
-    long fsize = ftell(infp);
-    fseek(infp, 0, SEEK_SET);
-
+    long fsize = priv_fsize(infp);
     if (fsize < 0) {
         fclose(infp);
         return string(NULL, -1);
@@ -28,9 +41,7 @@ string fload(const char *filename)
 
 string floads(const string filename)
 {
-    char cfilename[256] = { 0 };
-    memcpy(cfilename, filename.s, filename.len <= 255 ? filename.len : 255);
-    return fload(cfilename);
+    wrapsfn(fload);
 }
 
 long fsize(const char *filename)
@@ -38,9 +49,7 @@ long fsize(const char *filename)
     FILE *infp = fopen(filename, "rb");
     if (!infp) return -1;
 
-    fseek(infp, 0, SEEK_END);
-    long fsize = ftell(infp);
-    fseek(infp, 0, SEEK_SET);
+    long fsize = priv_fsize(infp);
 
     fclose(infp);
     return fsize;
@@ -48,7 +57,24 @@ long fsize(const char *filename)
 
 long fsizes(const string filename)
 {
-    char cfilename[256] = { 0 };
-    memcpy(cfilename, filename.s, filename.len <= 255 ? filename.len : 255);
-    return fsize(cfilename);
+    wrapsfn(fsize);
+}
+
+file fprep(const char *filename)
+{
+    FILE *infp = fopen(filename, "rb");
+    if (!infp) return (file){ .hdl = NULL, .size = -1 };
+
+    long fsize = priv_fsize(infp);
+    if (fsize < 0) {
+        fclose(infp);
+        return (file){ .hdl = NULL, .size = -1 };
+    }
+
+    return (file){ .hdl = infp, .size = fsize };
+}
+
+file fpreps(const string filename)
+{
+    wrapsfn(fprep);
 }
