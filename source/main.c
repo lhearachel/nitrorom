@@ -59,8 +59,8 @@ static const cfgsection cfgsections[] = {
     { .section = string("header"),   .handler = cfg_header },
     { .section = string("rom"),      .handler = cfg_rom    },
     { .section = string("banner"),   .handler = cfg_banner },
-    { .section = string("arm9"), .handler = cfg_arm9   },
-    { .section = string("arm7"), .handler = cfg_arm7   },
+    { .section = string("arm9"),     .handler = cfg_arm9   },
+    { .section = string("arm7"),     .handler = cfg_arm7   },
     { .section = stringZ,            .handler = NULL       },
 };
 // clang-format on
