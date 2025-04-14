@@ -239,7 +239,7 @@ static int sealheader(rompacker *packer, uint32_t romsize)
     putleword(header + OFS_HEADER_HEADERSIZE, HEADER_BSIZE);
     putleword(header + OFS_HEADER_STATICFOOTER, 0x00004BA0); // static NitroSDK footer
 
-    uint16_t crc = crc16(string(header, HEADER_BSIZE), 0xFFFF);
+    uint16_t crc = crc16(string(header, OFS_HEADER_HEADERCRC), 0xFFFF);
     if (packer->verbose) fprintf(stderr, "rompacker: header CRC: 0x%04X\n", crc);
     putlehalf(header + OFS_HEADER_HEADERCRC, crc);
 
