@@ -13,16 +13,6 @@
 #include "litend.h"
 #include "strings.h"
 
-#define LEN_HEADER_TITLE  12
-#define LEN_HEADER_SERIAL 4
-#define LEN_HEADER_MAKER  2
-
-#define OFS_HEADER_TITLE     0x000
-#define OFS_HEADER_SERIAL    0x00C
-#define OFS_HEADER_MAKER     0x010
-#define OFS_HEADER_REVISION  0x01E
-#define OFS_HEADER_SECURECRC 0x06C
-
 static cfgresult cfg_header_template(rompacker *packer, string val, long line)
 {
     string ftemplate = floads(val);

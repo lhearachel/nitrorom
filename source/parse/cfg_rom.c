@@ -8,20 +8,9 @@
 
 #include "cfgparse.h"
 #include "config.h"
+#include "constants.h"
 #include "litend.h"
 #include "strings.h"
-
-#define ST_MROM 0x051E
-#define ST_PROM 0x0D7E
-
-#define ROMCTRL_DEC_MROM 0x00586000
-#define ROMCTRL_ENC_MROM 0x001808F8
-#define ROMCTRL_DEC_PROM 0x00416657
-#define ROMCTRL_ENC_PROM 0x081808F8
-
-#define OFS_HEADER_ROMCTRL_DEC  0x060
-#define OFS_HEADER_ROMCTRL_ENC  0x064
-#define OFS_HEADER_SECURE_DELAY 0x06E
 
 // clang-format off
 static const strkeyval storagetypes[] = {

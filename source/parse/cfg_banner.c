@@ -14,27 +14,6 @@
 #include "litend.h"
 #include "strings.h"
 
-#define ICON_BITMAP_DIMEN  32
-#define ICON_BITMAP_BSIZE  ((ICON_BITMAP_DIMEN * ICON_BITMAP_DIMEN) / 2)
-#define ICON_COLOR_BSIZE   2
-#define ICON_COLOR_DEPTH   16
-#define ICON_PALETTE_BSIZE (ICON_COLOR_DEPTH * ICON_COLOR_BSIZE)
-
-#define UNICODE_BMP_BSIZE  2
-#define BANNER_TITLE_LEN   128
-#define BANNER_TITLE_BSIZE (UNICODE_BMP_BSIZE * BANNER_TITLE_LEN)
-
-#define OFS_BANNER_ICON_BITMAP  0x020
-#define OFS_BANNER_ICON_PALETTE 0x220
-#define OFS_BANNER_TITLE_JP     0x240
-#define OFS_BANNER_TITLE_EN     0x340
-#define OFS_BANNER_TITLE_FR     0x440
-#define OFS_BANNER_TITLE_DE     0x540
-#define OFS_BANNER_TITLE_IT     0x640
-#define OFS_BANNER_TITLE_ES     0x740
-#define OFS_BANNER_TITLE_CN     0x840
-#define OFS_BANNER_TITLE_KR     0x940
-
 static cfgresult cfg_banner_version(rompacker *packer, string val, long line)
 {
     unsigned int result = 0;

@@ -13,27 +13,6 @@
 #include "strings.h"
 #include "vector.h"
 
-#define OFS_HEADER_CHIPCAPACITY     0x014
-#define OFS_HEADER_ARM9_ROMOFFSET   0x020
-#define OFS_HEADER_ARM7_ROMOFFSET   0x030
-#define OFS_HEADER_FNTB_ROMOFFSET   0x040
-#define OFS_HEADER_FNTB_BSIZE       0x044
-#define OFS_HEADER_FATB_ROMOFFSET   0x048
-#define OFS_HEADER_FATB_BSIZE       0x04C
-#define OFS_HEADER_OVT9_ROMOFFSET   0x050
-#define OFS_HEADER_OVT9_BSIZE       0x054
-#define OFS_HEADER_OVT7_ROMOFFSET   0x058
-#define OFS_HEADER_OVT7_BSIZE       0x05C
-#define OFS_HEADER_BANNER_ROMOFFSET 0x068
-#define OFS_HEADER_ROMSIZE          0x080
-#define OFS_HEADER_HEADERSIZE       0x084
-#define OFS_HEADER_STATICFOOTER     0x088
-#define OFS_HEADER_HEADERCRC        0x15E
-
-#define OFS_BANNER_CRC_V1OFFSET 0x002
-#define OFS_BANNER_CRC_V2OFFSET 0x004
-#define OFS_BANNER_CRC_V3OFFSET 0x006
-
 rompacker *rompacker_new(unsigned int verbose)
 {
     rompacker *packer = calloc(1, sizeof(*packer));

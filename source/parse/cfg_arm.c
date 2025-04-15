@@ -14,16 +14,6 @@
 #include "strings.h"
 #include "vector.h"
 
-#define OFS_HEADER_ARM9_ENTRYPOINT 0x024
-#define OFS_HEADER_ARM9_LOADADDR   0x028
-#define OFS_HEADER_ARM9_LOADSIZE   0x02C
-#define OFS_HEADER_ARM9_AUTOLOADCB 0x070
-
-#define OFS_HEADER_ARM7_ENTRYPOINT 0x034
-#define OFS_HEADER_ARM7_LOADADDR   0x038
-#define OFS_HEADER_ARM7_LOADSIZE   0x03C
-#define OFS_HEADER_ARM7_AUTOLOADCB 0x074
-
 // NOTE: This performs an allocation that may *appear* to be left dangling, but we employ a trick:
 // The first element of the vector points to the beginning of the allocated region, so freeing the
 // first element's filename string will free the entire region.
