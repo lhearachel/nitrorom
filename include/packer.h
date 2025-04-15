@@ -13,7 +13,6 @@
 
 typedef struct source {
     string filename;
-    long   size;
 
     union {
         FILE *hdl;
@@ -22,8 +21,10 @@ typedef struct source {
 } source;
 
 typedef struct rommember {
-    source source;
-    long   pad;
+    source   source;
+    uint32_t size;
+    uint32_t offset; // final offset of the member
+    uint16_t pad;
 } rommember;
 
 // We don't maintain file-handles for filesystem members as the upper-bound of filesystem members
@@ -31,8 +32,9 @@ typedef struct rommember {
 typedef struct romfile {
     string   source;
     string   target;
-    long     size;
-    int      pad;
+    uint32_t size;
+    uint32_t offset; // final offset of the file
+    uint16_t pad;
     uint16_t filesysid;
     uint16_t packingid;
 } romfile;

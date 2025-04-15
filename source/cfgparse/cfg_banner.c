@@ -61,7 +61,7 @@ static cfgresult cfg_banner_version(rompacker *packer, string val, long line)
 
     packer->bannerver              = result;
     packer->banner.source.filename = string("%BANNER%");
-    packer->banner.source.size     = bannersize;
+    packer->banner.size            = bannersize;
     packer->banner.pad             = -bannersize & (ROM_ALIGN - 1);
     packer->banner.source.buf      = calloc(bannersize, 1);
 

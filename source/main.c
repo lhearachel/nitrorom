@@ -69,7 +69,7 @@ static void   showusage(FILE *stream);
 static args   parseargs(const char **argv);
 static string tryfload(const char *filename);
 
-#define dumpargs(__memb) (__memb).source.buf, (__memb).source.size
+#define dumpargs(__memb) (__memb).source.buf, (__memb).size
 
 int main(int argc, const char **argv)
 {

@@ -52,9 +52,9 @@ static cfgresult cfg_overlays(rompacker *packer, file *f, vector *ovyvec, long l
             );
         }
 
-        ovy->source.size = fovy.size;
-        ovy->source.hdl  = fovy.hdl;
-        ovy->pad         = -(fovy.size) & (ROM_ALIGN - 1);
+        ovy->source.hdl = fovy.hdl;
+        ovy->size       = fovy.size;
+        ovy->pad        = -(fovy.size) & (ROM_ALIGN - 1);
 
         if (packer->verbose) {
             fprintf(
@@ -82,8 +82,8 @@ static inline cfgresult cfg_arm_prepfile(
     if (fhandle.size < 0) configerr("could not open %s file “%.*s”", key, fmtstring(val));
 
     target->source.filename = val;
-    target->source.size     = fhandle.size;
     target->source.hdl      = fhandle.hdl;
+    target->size            = fhandle.size;
     target->pad             = -(fhandle.size) & (ROM_ALIGN - 1);
 
     if (packer->verbose) {

@@ -46,8 +46,8 @@ rompacker *rompacker_new(unsigned int verbose)
 
     // The header is the only constant-size element in the entire ROM, so we can pre-allocate it.
     packer->banner.source.filename = string("%HEADER%");
-    packer->header.source.size     = HEADER_BSIZE;
     packer->header.source.buf      = calloc(HEADER_BSIZE, 1);
+    packer->header.size            = HEADER_BSIZE;
 
     packer->ovy9    = newvec(rommember, 128);
     packer->ovy7    = newvec(rommember, 128);
@@ -142,35 +142,41 @@ static int comparefnames(const void *a, const void *b) // NOLINT
 #define fatb_begin(__fatb, __i) ((__fatb) + ((ptrdiff_t)((__i) * 8)))
 #define fatb_end(__fatb, __i)   ((__fatb) + ((ptrdiff_t)((__i) * 8) + 4))
 
-#define membsize(__memb) ((__memb)->source.size + (__memb)->pad)
-#define filesize(__file) ((__file)->size + (__file)->pad)
+#define membsize(__memb) ((__memb)->size + (__memb)->pad)
 
-#define printmemb(__curs, __memb)                              \
-    {                                                          \
-        fprintf(                                               \
-            stderr,                                            \
-            "rompacker:member: 0x%08X,0x%08lX,0x%08lX,%.*s\n", \
-            __curs,                                            \
-            (__memb)->source.size,                             \
-            membsize(__memb),                                  \
-            fmtstring((__memb)->source.filename)               \
-        );                                                     \
+#define printmemb(__curs, __memb)                            \
+    {                                                        \
+        fprintf(                                             \
+            stderr,                                          \
+            "rompacker:member: 0x%08X,0x%08X,0x%08X,%.*s\n", \
+            __curs,                                          \
+            (__memb)->size,                                  \
+            membsize(__memb),                                \
+            fmtstring((__memb)->source.filename)             \
+        );                                                   \
     }
 
-#define printfile(__curs, __file)                              \
-    {                                                          \
-        fprintf(                                               \
-            stderr,                                            \
-            "rompacker:member: 0x%08X,0x%08lX,0x%08lX,%.*s\n", \
-            __curs,                                            \
-            (__file)->size,                                    \
-            filesize(__file),                                  \
-            fmtstring((__file)->target)                        \
-        );                                                     \
+#define printfile(__curs, __file)                            \
+    {                                                        \
+        fprintf(                                             \
+            stderr,                                          \
+            "rompacker:member: 0x%08X,0x%08X,0x%08X,%.*s\n", \
+            __curs,                                          \
+            (__file)->size,                                  \
+            membsize(__file),                                \
+            fmtstring((__file)->target)                      \
+        );                                                   \
     }
 
 #define sealarmparams(__packer, __n)                                         \
     &(__packer)->arm##__n, &(__packer)->ovt##__n, &(__packer)->ovy##__n, __n
+
+#define sealmemb(__memb, __cursor, __verbose)             \
+    {                                                     \
+        if (__verbose) printmemb(__cursor, __memb);       \
+        (__memb)->offset = (__cursor);                    \
+        (__cursor)       = (__cursor) + membsize(__memb); \
+    }
 
 static void sealarm(
     rommember     *arm,
@@ -188,22 +194,18 @@ static void sealarm(
     uint32_t ofsovtrom  = which == 9 ? OFS_HEADER_OVT9_ROMOFFSET : OFS_HEADER_OVT7_ROMOFFSET;
     uint32_t ofsovtsize = which == 9 ? OFS_HEADER_OVT9_BSIZE : OFS_HEADER_OVT7_BSIZE;
 
-    if (verbose) printmemb(*romcursor, arm);
     putleword(header + ofsarmrom, *romcursor);
-    *romcursor = *romcursor + membsize(arm);
+    sealmemb(arm, *romcursor, verbose);
 
-    if (verbose) printmemb(*romcursor, ovt);
-    putleword(header + ofsovtrom, ovt->source.size > 0 ? *romcursor : 0);
-    putleword(header + ofsovtsize, ovt->source.size);
-    *romcursor = *romcursor + membsize(ovt);
+    putleword(header + ofsovtrom, ovt->size > 0 ? *romcursor : 0);
+    putleword(header + ofsovtsize, ovt->size);
+    sealmemb(ovt, *romcursor, verbose);
 
     for (int i = 0, j = ovyofs; i < ovyvec->len; i++, j++) {
         rommember *ovy = get(ovyvec, rommember, i);
         putleword(fatb_begin(fatb, j), *romcursor);
-        putleword(fatb_end(fatb, j), *romcursor + ovy->source.size);
-
-        if (verbose) printmemb(*romcursor, ovy);
-        *romcursor = *romcursor + membsize(ovy);
+        putleword(fatb_end(fatb, j), *romcursor + ovy->size);
+        sealmemb(ovy, *romcursor, verbose);
     }
 }
 
@@ -214,8 +216,8 @@ static void sealfntb(rompacker *packer, romfile *sorted, uint32_t fileid)
 
     // TODO: Hacking the FNTB for now
     packer->fntb.source.filename = string("%FILENAMES%");
-    packer->fntb.source.size     = 0x1BB4;
-    packer->fntb.source.buf      = calloc(packer->fntb.source.size, 1);
+    packer->fntb.size            = 0x1BB4;
+    packer->fntb.source.buf      = calloc(packer->fntb.size, 1);
     packer->fntb.pad             = 0x4C;
 }
 
@@ -287,9 +289,9 @@ int rompacker_seal(rompacker *packer)
     int numfiles = numovys + packer->filesys.len;
     if (numfiles > 0) {
         packer->fatb.source.filename = string("%FILEALLOCS%");
-        packer->fatb.source.size     = (long)numfiles * 8;
-        packer->fatb.source.buf      = calloc(packer->fatb.source.size, 1);
-        packer->fatb.pad             = -(packer->fatb.source.size) & (ROM_ALIGN - 1);
+        packer->fatb.size            = numfiles * 8;
+        packer->fatb.source.buf      = calloc(packer->fatb.size, 1);
+        packer->fatb.pad             = -(packer->fatb.size) & (ROM_ALIGN - 1);
     }
 
     uint32_t       romcursor = HEADER_BSIZE;
@@ -306,26 +308,26 @@ int rompacker_seal(rompacker *packer)
         free(sorted);
     }
 
-    if (packer->verbose) printmemb(romcursor, &packer->fntb);
     putleword(header + OFS_HEADER_FNTB_ROMOFFSET, romcursor);
-    putleword(header + OFS_HEADER_FNTB_BSIZE, packer->fntb.source.size);
-    romcursor += membsize(&packer->fntb);
+    putleword(header + OFS_HEADER_FNTB_BSIZE, packer->fntb.size);
+    sealmemb(&packer->fntb, romcursor, packer->verbose);
 
-    if (packer->verbose) printmemb(romcursor, &packer->fatb);
     putleword(header + OFS_HEADER_FATB_ROMOFFSET, romcursor);
-    putleword(header + OFS_HEADER_FATB_BSIZE, packer->fatb.source.size);
-    romcursor += membsize(&packer->fatb);
+    putleword(header + OFS_HEADER_FATB_BSIZE, packer->fatb.size);
+    sealmemb(&packer->fatb, romcursor, packer->verbose);
 
-    if (packer->verbose) printmemb(romcursor, &packer->banner);
     putleword(header + OFS_HEADER_BANNER_ROMOFFSET, romcursor);
-    romcursor += membsize(&packer->banner);
+    sealmemb(&packer->banner, romcursor, packer->verbose);
 
     for (int i = 0, j = numovys; i < packer->filesys.len; i++, j++) {
         romfile *topack = get(&packer->filesys, romfile, i);
-        if (packer->verbose) printfile(romcursor, topack);
         putleword(fatb_begin(fatb, j), romcursor);
         putleword(fatb_end(fatb, j), romcursor + topack->size);
-        romcursor += filesize(topack);
+
+        // No need to write a macro for one instance.
+        if (packer->verbose) printfile(romcursor, topack);
+        topack->offset  = romcursor;
+        romcursor      += membsize(topack);
     }
 
     // Final ROM size must ignore the padding of the last-added member (either the banner or the
@@ -379,15 +381,17 @@ sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
     romfile   *file   = push(&packer->filesys, romfile);
     file->source      = record->fields[SOURCE];
     file->target      = record->fields[TARGET];
-    file->size        = fsizes(file->source);
-    file->pad         = (int)(-(file->size) & (ROM_ALIGN - 1));
 
-    if (file->size < 0) sheetserr("could not open source file “%.*s”", fmtstring(file->source));
+    long fsize = fsizes(file->source);
+    file->size = fsize;
+    file->pad  = -file->size & (ROM_ALIGN - 1);
+
+    if (fsize < 0) sheetserr("could not open source file “%.*s”", fmtstring(file->source));
 
     if (packer->verbose) {
         fprintf(
             stderr,
-            "rompacker:filesystem: 0x%08lX,0x%08X,%.*s,%.*s\n",
+            "rompacker:filesystem: 0x%08X,0x%08X,%.*s,%.*s\n",
             file->size,
             file->pad,
             fmtstring(file->source),
