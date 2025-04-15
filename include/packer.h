@@ -74,19 +74,18 @@ enum dumperr {
     E_dump_nullfile,
 };
 
-// Handlers for expected sections of the packer's config file
-cfgresult cfg_header(string sec, string key, string val, void *packer, long line);
-cfgresult cfg_rom(string sec, string key, string val, void *packer, long line);
-cfgresult cfg_banner(string sec, string key, string val, void *packer, long line);
-cfgresult cfg_arm9(string sec, string key, string val, void *packer, long line);
-cfgresult cfg_arm7(string sec, string key, string val, void *packer, long line);
-
-// Handler for filesystem CSV parser
-sheetsresult csv_addfile(sheetsrecord *record, void *packer, int line);
-
 rompacker   *rompacker_new(unsigned int verbose);
 void         rompacker_del(rompacker *packer);
 int          rompacker_seal(rompacker *packer);
 enum dumperr rompacker_dump(rompacker *packer, FILE *stream);
+
+// Handlers for packer configuration and filesystem entries. The definitions for these functions
+// are contained within their own files in `source/parse/`.
+cfgresult    cfg_header(string sec, string key, string val, void *packer, long line);
+cfgresult    cfg_rom(string sec, string key, string val, void *packer, long line);
+cfgresult    cfg_banner(string sec, string key, string val, void *packer, long line);
+cfgresult    cfg_arm9(string sec, string key, string val, void *packer, long line);
+cfgresult    cfg_arm7(string sec, string key, string val, void *packer, long line);
+sheetsresult csv_addfile(sheetsrecord *record, void *packer, int line);
 
 #endif // PACKER_H

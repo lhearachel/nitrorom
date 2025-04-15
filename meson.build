@@ -24,12 +24,13 @@ fileio_dep = declare_dependency(sources: files('source/fileio.c'), dependencies:
 executable(
   'nitrorom',
   sources: files(
-    'source/cfgparse/cfg_arm.c',
-    'source/cfgparse/cfg_banner.c',
-    'source/cfgparse/cfg_header.c',
-    'source/cfgparse/cfg_rom.c',
     'source/main.c',
     'source/packer.c',
+    'source/parse/cfg_arm.c',
+    'source/parse/cfg_banner.c',
+    'source/parse/cfg_header.c',
+    'source/parse/cfg_rom.c',
+    'source/parse/csv_addfile.c',
   ),
   include_directories: public_includes,
   dependencies: [

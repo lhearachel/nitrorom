@@ -9,9 +9,7 @@
 #include <string.h>
 
 #include "constants.h"
-#include "fileio.h"
 #include "litend.h"
-#include "sheets.h"
 #include "strings.h"
 #include "vector.h"
 
@@ -354,51 +352,4 @@ enum dumperr rompacker_dump(rompacker *packer, FILE *stream)
 
     // TODO: Write members to stream
     return E_dump_ok;
-}
-
-#define sheetserr(__msg, ...)                                           \
-    {                                                                   \
-        sheetsresult __res = { .code = E_sheets_user, .pos = stringZ }; \
-        snprintf(                                                       \
-            (__res).msg,                                                \
-            sizeof(__res).msg,                                          \
-            "rompacker:filesystem:%d: " __msg,                          \
-            line,                                                       \
-            __VA_ARGS__                                                 \
-        );                                                              \
-        return __res;                                                   \
-    }
-
-#define SOURCE 0
-#define TARGET 1
-
-sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
-{
-    if (record->nfields != 2) {
-        sheetserr("expected 2 fields for record, but found %lu", record->nfields);
-    }
-
-    rompacker *packer = user;
-    romfile   *file   = push(&packer->filesys, romfile);
-    file->source      = record->fields[SOURCE];
-    file->target      = record->fields[TARGET];
-
-    long fsize = fsizes(file->source);
-    file->size = fsize;
-    file->pad  = -file->size & (ROM_ALIGN - 1);
-
-    if (fsize < 0) sheetserr("could not open source file “%.*s”", fmtstring(file->source));
-
-    if (packer->verbose) {
-        fprintf(
-            stderr,
-            "rompacker:filesystem: 0x%08X,0x%08X,%.*s,%.*s\n",
-            file->size,
-            file->pad,
-            fmtstring(file->source),
-            fmtstring(file->target)
-        );
-    }
-
-    return (sheetsresult){ .code = E_sheets_none };
 }
