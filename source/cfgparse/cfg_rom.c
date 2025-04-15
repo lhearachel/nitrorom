@@ -25,8 +25,8 @@
 
 // clang-format off
 static const strkeyval storagetypes[] = {
-    { .smatch = string("MROM"),  .val = ST_MROM },
     { .smatch = string("PROM"),  .val = ST_PROM },
+    { .smatch = string("MROM"),  .val = ST_MROM },
     { .smatch = stringZ,         .val = 0       },
 };
 
@@ -56,6 +56,7 @@ static cfgresult cfg_rom_storagetype(rompacker *packer, string val, long line)
     putleword(header + OFS_HEADER_ROMCTRL_ENC, romctrl_enc);
     putlehalf(header + OFS_HEADER_SECURE_DELAY, match->val);
 
+    packer->prom = match->val == ST_PROM;
     if (packer->verbose) {
         fprintf(
             stderr,

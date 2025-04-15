@@ -53,6 +53,7 @@ typedef struct rompacker {
     // rom-wide configuration values
     unsigned int filltail : 1;
     unsigned int fillwith : 8;
+    unsigned int prom     : 1;
 
     rommember header;  // intermediate (optional template)
     rommember arm9;    // from disk (required)

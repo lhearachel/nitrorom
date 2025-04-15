@@ -9,4 +9,8 @@
 #define BANNER_BSIZE_V3 0x1240
 #define ROM_ALIGN       0x200
 
+#define TRY_CAPSHIFT_BASE 0x00020000
+#define MAX_CAPSHIFT_MROM 10
+#define MAX_CAPSHIFT_PROM 15
+
 #endif // CONSTANTS_H

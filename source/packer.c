@@ -225,9 +225,10 @@ static int sealheader(rompacker *packer, uint32_t romsize)
 {
     unsigned char *header = packer->header.source.buf;
 
-    uint32_t trycap = 0x00020000;
-    int      shift  = 0; // TODO: Enforce a different maximum capacity-shift for MROM storage
-    for (; shift < 15; shift++) {
+    uint32_t trycap   = TRY_CAPSHIFT_BASE;
+    int      maxshift = packer->prom ? MAX_CAPSHIFT_PROM : MAX_CAPSHIFT_MROM;
+    int      shift    = 0;
+    for (; shift < maxshift; shift++) {
         if (romsize < (trycap << shift)) {
             header[OFS_HEADER_CHIPCAPACITY] = shift;
             break;
@@ -235,7 +236,7 @@ static int sealheader(rompacker *packer, uint32_t romsize)
     }
 
     // ROM size exceeds the maximum; main thread should die from here
-    if (shift == 15) return 1;
+    if (shift == maxshift) return 1;
 
     putleword(header + OFS_HEADER_ROMSIZE, romsize);
     putleword(header + OFS_HEADER_HEADERSIZE, HEADER_BSIZE);

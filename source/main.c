@@ -13,6 +13,7 @@
 
 #include "clip.h"
 #include "config.h"
+#include "constants.h"
 #include "fileio.h"
 #include "packer.h"
 #include "sheets.h"
@@ -99,7 +100,9 @@ int main(int argc, const char **argv)
     dieiferr(csvparse(csvfile, NULL, csv_addfile, packer), sheetsresult);
 
     if (rompacker_seal(packer) != 0) {
-        die("computed ROM size exceeds allowable maximum of 0x80000000!\n");
+        int maxshift = packer->prom ? MAX_CAPSHIFT_PROM : MAX_CAPSHIFT_MROM;
+        die("computed ROM size exceeds allowable maximum of 0x%08X!\n",
+            TRY_CAPSHIFT_BASE << maxshift);
     }
 
     if (args.dryrun) {
