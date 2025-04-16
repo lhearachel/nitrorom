@@ -15,11 +15,11 @@ project(
 
 public_includes = include_directories('include')
 
-clip_dep = declare_dependency(sources: files('source/clip.c'))
-strings_dep = declare_dependency(sources: files('source/strings.c'))
-config_dep = declare_dependency(sources: files('source/config.c'), dependencies: [strings_dep])
-sheets_dep = declare_dependency(sources: files('source/sheets.c'), dependencies: [strings_dep])
-fileio_dep = declare_dependency(sources: files('source/fileio.c'), dependencies: [strings_dep])
+clip_dep = declare_dependency(sources: files('source/libs/clip.c'))
+strings_dep = declare_dependency(sources: files('source/libs/strings.c'))
+config_dep = declare_dependency(sources: files('source/libs/config.c'), dependencies: [strings_dep])
+sheets_dep = declare_dependency(sources: files('source/libs/sheets.c'), dependencies: [strings_dep])
+fileio_dep = declare_dependency(sources: files('source/libs/fileio.c'), dependencies: [strings_dep])
 
 executable(
   'nitrorom',
