@@ -92,6 +92,11 @@ int main(int argc, const char **argv)
 
     string cfgfile = tryfload(args.config);
     string csvfile = tryfload(args.files);
+    FILE  *outfile = NULL;
+    if (!args.dryrun) {
+        outfile = fopen(args.outfile, "wb");
+        if (!outfile) die("could not open output file “%s”!", args.outfile);
+    }
 
     chdir(args.workdir);
 
@@ -111,21 +116,17 @@ int main(int argc, const char **argv)
         fdump("fntb.sbin", dumpargs(packer->fntb));
         fdump("fatb.sbin", dumpargs(packer->fatb));
     } else {
-        FILE *outfile = fopen(args.outfile, "wb");
-        if (!outfile) die("could not open output file “%s”!", args.outfile);
-
         enum dumperr err = rompacker_dump(packer, outfile);
         switch (err) {
         case E_dump_packing: die("packer was not correctly sealed!");
         case E_dump_ok:      break;
         }
-
-        fclose(outfile);
     }
 
     rompacker_del(packer);
     free(cfgfile.s);
     free(csvfile.s);
+    if (outfile) fclose(outfile);
     exit(EXIT_SUCCESS);
 }
 
