@@ -331,6 +331,7 @@ static int sealheader(rompacker *packer, uint32_t romsize)
     // ROM size exceeds the maximum; main thread should die from here
     if (shift == maxshift) return 1;
 
+    packer->tailsize = (trycap << shift);
     putleword(header + OFS_HEADER_ROMSIZE, romsize);
     putleword(header + OFS_HEADER_HEADERSIZE, HEADER_BSIZE);
     putleword(header + OFS_HEADER_STATICFOOTER, 0x00004BA0); // static NitroSDK footer
@@ -438,12 +439,104 @@ int rompacker_seal(rompacker *packer)
     return result;
 }
 
+#define READSIZE 4096
+
+#define writememb_buf(__memb, __fill, __stream)                         \
+    {                                                                   \
+        fwrite((__memb).source.buf, 1, (__memb).size, __stream);        \
+        for (int i = 0; i < (__memb).pad; i++) fputc(__fill, __stream); \
+    };
+
+#define writememb_hdl(__memb, __fill, __stream)                         \
+    {                                                                   \
+        while ((__memb).size > 0) {                                     \
+            size_t __nread = fread(                                     \
+                readbuf,                                                \
+                1,                                                      \
+                (__memb).size > READSIZE ? READSIZE : (__memb).size,    \
+                (__memb).source.hdl                                     \
+            );                                                          \
+            fwrite(readbuf, 1, __nread, __stream);                      \
+            (__memb).size -= __nread;                                   \
+        }                                                               \
+        for (int i = 0; i < (__memb).pad; i++) fputc(__fill, __stream); \
+    }
+
 enum dumperr rompacker_dump(rompacker *packer, FILE *stream)
 {
-    if (packer->verbose) fprintf(stderr, "rompacker: dumping contents to disk!\n");
+    if (packer->verbose) fprintf(stderr, "rompacker: dumping contents to disk... ");
     if (packer->packing) return E_dump_packing;
-    if (!stream) return E_dump_nullfile;
 
-    // TODO: Write members to stream
+    unsigned char *readbuf = malloc(READSIZE);
+
+    if (packer->verbose) fprintf(stderr, "header... ");
+    writememb_buf(packer->header, packer->fillwith, stream);
+
+    if (packer->verbose) fprintf(stderr, "arm9... ");
+    writememb_hdl(packer->arm9, packer->fillwith, stream);
+
+    if (packer->verbose && packer->ovt9.size) fprintf(stderr, "ovt9... ");
+    writememb_hdl(packer->ovt9, packer->fillwith, stream);
+
+    if (packer->verbose && packer->ovy9.len) fprintf(stderr, "ovy9... ");
+    for (int i = 0; i < packer->ovy9.len; i++) {
+        rommember *ovy = get(&packer->ovy9, rommember, i);
+        writememb_hdl(*ovy, packer->fillwith, stream);
+    }
+
+    if (packer->verbose) fprintf(stderr, "arm7... ");
+    writememb_hdl(packer->arm7, packer->fillwith, stream);
+
+    if (packer->verbose && packer->ovt7.size) fprintf(stderr, "ovt7... ");
+    writememb_hdl(packer->ovt7, packer->fillwith, stream);
+
+    if (packer->verbose && packer->ovy7.len) fprintf(stderr, "ovy7... ");
+    for (int i = 0; i < packer->ovy7.len; i++) {
+        rommember *ovy = get(&packer->ovy7, rommember, i);
+        writememb_hdl(*ovy, packer->fillwith, stream);
+    }
+
+    if (packer->verbose && packer->fntb.size) fprintf(stderr, "fntb... ");
+    writememb_buf(packer->fntb, packer->fillwith, stream);
+
+    if (packer->verbose && packer->fatb.size) fprintf(stderr, "fatb... ");
+    writememb_buf(packer->fatb, packer->fillwith, stream);
+
+    if (packer->verbose && packer->banner.size) fprintf(stderr, "banner... ");
+    writememb_buf(packer->banner, packer->fillwith, stream);
+
+    char sourcefn[256] = { 0 };
+    if (packer->verbose && packer->banner.size) fprintf(stderr, "filesys... ");
+    for (int i = 0; i < packer->filesys.len; i++) {
+        romfile *file = get(&packer->filesys, romfile, i);
+
+        int sourcefnlen = file->source.len <= 255 ? (int)file->source.len : 255;
+        memcpy(sourcefn, file->source.s, sourcefnlen);
+        sourcefn[sourcefnlen] = '\0';
+
+        FILE *source = fopen(sourcefn, "rb"); // NOLINT; this file is known to exist
+        while (file->size > 0) {
+            size_t nread = fread( // NOLINT: clang-tidy claims that this can invoke fread on EOF, which is impossible
+                readbuf,
+                1,
+                file->size > READSIZE ? READSIZE : file->size,
+                source
+            );
+
+            fwrite(readbuf, 1, nread, stream);
+            file->size -= nread;
+        }
+        for (int i = 0; i < file->pad; i++) fputc(packer->fillwith, stream);
+        fclose(source); // NOLINT; filesystem entries must exist to get this far
+    }
+
+    if (packer->filltail) {
+        for (size_t curr = ftell(stream); curr < packer->tailsize; curr++) {
+            fputc(packer->fillwith, stream);
+        }
+    }
+
+    if (packer->verbose) fprintf(stderr, "done!\n");
+    free(readbuf);
     return E_dump_ok;
 }

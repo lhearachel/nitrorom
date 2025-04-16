@@ -55,6 +55,8 @@ typedef struct rompacker {
     unsigned int fillwith : 8;
     unsigned int prom     : 1;
 
+    unsigned int tailsize;
+
     rommember header;  // intermediate (optional template)
     rommember arm9;    // from disk (required)
     rommember ovt9;    // from disk (optional)
@@ -71,7 +73,6 @@ typedef struct rompacker {
 enum dumperr {
     E_dump_ok = 0,
     E_dump_packing,
-    E_dump_nullfile,
 };
 
 rompacker   *rompacker_new(unsigned int verbose);

@@ -111,7 +111,16 @@ int main(int argc, const char **argv)
         fdump("fntb.sbin", dumpargs(packer->fntb));
         fdump("fatb.sbin", dumpargs(packer->fatb));
     } else {
-        rompacker_dump(packer, NULL); // TODO:
+        FILE *outfile = fopen(args.outfile, "wb");
+        if (!outfile) die("could not open output file “%s”!", args.outfile);
+
+        enum dumperr err = rompacker_dump(packer, outfile);
+        switch (err) {
+        case E_dump_packing: die("packer was not correctly sealed!");
+        case E_dump_ok:      break;
+        }
+
+        fclose(outfile);
     }
 
     rompacker_del(packer);
