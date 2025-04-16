@@ -124,6 +124,8 @@ int main(int argc, const char **argv)
     }
 
     rompacker_del(packer);
+    free(cfgfile.s);
+    free(csvfile.s);
     exit(EXIT_SUCCESS);
 }
 
