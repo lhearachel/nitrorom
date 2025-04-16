@@ -186,16 +186,132 @@ static void sealarm(
     }
 }
 
-static void sealfntb(rompacker *packer, romfile *sorted, uint32_t fileid)
-{
-    (void)sorted;
-    (void)fileid;
+typedef struct virtdir {
+    vector   children;
+    string   path;
+    uint16_t file0;
+    uint16_t id;
+    uint16_t parent;
+} virtdir;
 
-    // TODO: Hacking the FNTB for now
+typedef struct virtnode {
+    string   name;
+    uint16_t dirid; // 0 is implicitly not a subdirectory.
+} virtnode;
+
+#define INITCAP 32
+
+static int findmismatch(vector *filesys, strpair *pathcut, int parts[INITCAP], virtdir **parent)
+{
+    int partsp = 0;
+    while (partsp < INITCAP && strequ((*parent)->path, pathcut->head)) {
+        partsp++;
+        *pathcut = strcut(pathcut->tail, '/');
+        *parent  = get(filesys, virtdir, parts[partsp]);
+    }
+
+    memset(parts + partsp, 0, INITCAP - partsp);
+    return partsp;
+}
+
+static int makevirtfile(vector *dirtree, int parentid, string name)
+{
+    virtdir  *parent = get(dirtree, virtdir, parentid);
+    virtnode *file   = push(&parent->children, virtnode);
+    file->dirid      = 0;
+    file->name       = name;
+
+    return 1 + (int)name.len;
+    //     ^   ~~~~~~~~^ -----> file name (no null-terminator)
+    //     `------------------> 1 byte for data mask
+}
+
+static int buildfntb(rompacker *packer, romfile *sorted, vector *dirtree, int fileid)
+{
+    int parts[INITCAP] = { 0 };
+    int ndirs          = 1;
+    int fntbsize       = 0;
+
+    for (int i = 0; i < packer->filesys.len; i++) {
+        romfile *sfile   = sorted + i;
+        virtdir *parent  = get(dirtree, virtdir, 0);
+        strpair  pathcut = strcut(sfile->target, '/');
+        int      partsp  = findmismatch(dirtree, &pathcut, parts, &parent);
+
+        // Make any needed virtual-parents for this file.
+        while (pathcut.tail.len > 0) {
+            virtdir *subdir  = push(dirtree, virtdir);
+            parent           = get(dirtree, virtdir, parts[partsp - 1]);
+            subdir->children = newvec(virtnode, INITCAP);
+            subdir->path     = pathcut.head;
+            subdir->file0    = fileid;
+            subdir->id       = ndirs | 0xF000;
+            subdir->parent   = parent->id;
+
+            virtnode *virdir = push(&parent->children, virtnode);
+            virdir->dirid    = subdir->id;
+            virdir->name     = pathcut.head;
+
+            pathcut          = strcut(pathcut.tail, '/');
+            parts[partsp++]  = ndirs++;
+            fntbsize        += 3 + (int)subdir->path.len;
+            //                 ^    ~~~~~~~~~~~~~~~^ -----> sub-directory name (no null-terminator)
+            //                 `--------------------------> 1 byte for data mask, 2 for subdir ID
+        }
+
+        fntbsize         += makevirtfile(dirtree, parts[partsp - 1], pathcut.head);
+        romfile *ufile    = get(&packer->filesys, romfile, sfile->packingid);
+        ufile->filesysid  = fileid++;
+    }
+
+    virtdir *root = get(dirtree, virtdir, 0);
+    root->parent  = ndirs;
+    return fntbsize + (9 * dirtree->len);
+    //                 ^   ~~~~~~~~~~~~~ ----> final number of directories
+    //                 `---------------------> 8 bytes for header, 1 null-terminator for contents
+}
+
+static void sealfntb(rompacker *packer, romfile *sorted, int fileid)
+{
+    vector  *dirtree = &newvec(virtdir, packer->filesys.len);
+    virtdir *root    = push(dirtree, virtdir); // WARN: do NOT use this pointer after buildfntb
+    root->children   = newvec(virtnode, INITCAP);
+    root->path       = stringZ;
+    root->file0      = fileid;
+    root->id         = 0xF000;
+
+    packer->fntb.size            = buildfntb(packer, sorted, dirtree, fileid);
+    packer->fntb.pad             = -packer->fntb.size & (ROM_ALIGN - 1);
     packer->fntb.source.filename = string("%FILENAMES%");
-    packer->fntb.size            = 0x1BB4;
     packer->fntb.source.buf      = calloc(packer->fntb.size, 1);
-    packer->fntb.pad             = 0x4C;
+
+    unsigned char *pstart    = packer->fntb.source.buf;
+    unsigned char *pheader   = pstart;
+    unsigned char *pcontents = pstart + ((ptrdiff_t)(8 * dirtree->len));
+    for (int i = 0; i < dirtree->len; i++) {
+        virtdir *vdir = get(dirtree, virtdir, i);
+        putleword(pheader, pcontents - pstart); // Offset from start of FNTB to this dir's contents
+        putlehalf(pheader + 4, vdir->file0);    // ID of the first file-child of this dir
+        putlehalf(pheader + 6, vdir->parent);   // ID of the parent dir
+
+        for (int j = 0; j < vdir->children.len; j++) {
+            virtnode *child = get(&vdir->children, virtnode, j);
+            pcontents[0]    = child->name.len | ((child->dirid != 0) << 7);
+
+            memcpy(pcontents + 1, child->name.s, child->name.len);
+            pcontents += child->name.len + 1;
+            if (child->dirid != 0) {
+                putlehalf(pcontents, child->dirid);
+                pcontents += 2;
+            }
+        }
+
+        pheader += 8;              // Next directory header
+        pcontents++;               // Skip over the null-terminator for this dir's contents
+        free(vdir->children.data); // Done with this directory and its children
+    }
+
+    free(dirtree->data);
 }
 
 static int sealheader(rompacker *packer, uint32_t romsize)
@@ -257,15 +373,6 @@ static void sealbanner(rompacker *packer)
     }
 }
 
-static inline void sealfileids(vector *unsorted, romfile *sorted, int firstfileid) // NOLINT
-{
-    for (int i = 0; i < unsorted->len; i++) {
-        romfile *sfile   = sorted + i;
-        romfile *ufile   = get(unsorted, romfile, sfile->packingid);
-        ufile->filesysid = i + firstfileid;
-    }
-}
-
 int rompacker_seal(rompacker *packer)
 {
     if (packer->verbose) fprintf(stderr, "rompacker: sealing the packer...\n");
@@ -291,9 +398,7 @@ int rompacker_seal(rompacker *packer)
         romfile *sorted = malloc(sizeof(romfile) * packer->filesys.len);
         memcpy(sorted, packer->filesys.data, sizeof(romfile) * packer->filesys.len);
         qsort(sorted, packer->filesys.len, sizeof(romfile), comparefnames);
-
         sealfntb(packer, sorted, numovys);
-        sealfileids(&packer->filesys, sorted, numovys);
         free(sorted);
     }
 
@@ -313,7 +418,6 @@ int rompacker_seal(rompacker *packer)
         putleword(fatb_begin(fatb, topack->filesysid), romcursor);
         putleword(fatb_end(fatb, topack->filesysid), romcursor + topack->size);
 
-        // No need to write a macro for one instance.
         if (packer->verbose) printfile(romcursor, topack);
         topack->offset  = romcursor;
         romcursor      += membsize(topack);
