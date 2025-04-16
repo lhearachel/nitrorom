@@ -5,3 +5,4 @@ temp/
 legacy/
 
 compile_commands.json
+*.nds
