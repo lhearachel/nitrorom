@@ -38,9 +38,10 @@ sheetsresult csv_addfile(sheetsrecord *record, void *user, int line)
     file->source      = record->fields[SOURCE];
     file->target      = record->fields[TARGET];
 
-    long fsize = fsizes(file->source);
-    file->size = fsize;
-    file->pad  = -file->size & (ROM_ALIGN - 1);
+    long fsize      = fsizes(file->source);
+    file->size      = fsize;
+    file->pad       = -file->size & (ROM_ALIGN - 1);
+    file->packingid = packer->filesys.len - 1;
 
     if (fsize < 0) sheetserr("could not open source file “%.*s”", fmtstring(file->source));
 

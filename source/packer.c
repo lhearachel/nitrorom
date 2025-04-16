@@ -257,6 +257,15 @@ static void sealbanner(rompacker *packer)
     }
 }
 
+static inline void sealfileids(vector *unsorted, romfile *sorted, int firstfileid) // NOLINT
+{
+    for (int i = 0; i < unsorted->len; i++) {
+        romfile *sfile   = sorted + i;
+        romfile *ufile   = get(unsorted, romfile, sfile->packingid);
+        ufile->filesysid = i + firstfileid;
+    }
+}
+
 int rompacker_seal(rompacker *packer)
 {
     if (packer->verbose) fprintf(stderr, "rompacker: sealing the packer...\n");
@@ -282,7 +291,9 @@ int rompacker_seal(rompacker *packer)
         romfile *sorted = malloc(sizeof(romfile) * packer->filesys.len);
         memcpy(sorted, packer->filesys.data, sizeof(romfile) * packer->filesys.len);
         qsort(sorted, packer->filesys.len, sizeof(romfile), comparefnames);
+
         sealfntb(packer, sorted, numovys);
+        sealfileids(&packer->filesys, sorted, numovys);
         free(sorted);
     }
 
@@ -297,10 +308,10 @@ int rompacker_seal(rompacker *packer)
     putleword(header + OFS_HEADER_BANNER_ROMOFFSET, romcursor);
     sealmemb(&packer->banner, romcursor, packer->verbose);
 
-    for (int i = 0, j = numovys; i < packer->filesys.len; i++, j++) {
+    for (int i = 0; i < packer->filesys.len; i++) {
         romfile *topack = get(&packer->filesys, romfile, i);
-        putleword(fatb_begin(fatb, j), romcursor);
-        putleword(fatb_end(fatb, j), romcursor + topack->size);
+        putleword(fatb_begin(fatb, topack->filesysid), romcursor);
+        putleword(fatb_end(fatb, topack->filesysid), romcursor + topack->size);
 
         // No need to write a macro for one instance.
         if (packer->verbose) printfile(romcursor, topack);
