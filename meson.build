@@ -11,8 +11,17 @@ project(
   },
 )
 
+if get_option('buildtype').startswith('debug')
+  git_exe = find_program('git')
+  revision_id = run_command(git_exe, 'rev-parse', '--short', 'HEAD', check: true).stdout().strip()
+  revision_str = f'+@revision_id@'
+else
+  revision_str = ''
+endif
+
 genconfig_data = configuration_data()
 genconfig_data.set_quoted('VERSION', meson.project_version())
+genconfig_data.set_quoted('REVISION', revision_str)
 genconfig = configure_file(output: 'genconfig.h', configuration: genconfig_data)
 
 public_includes = include_directories('include')

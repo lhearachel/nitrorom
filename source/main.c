@@ -82,7 +82,7 @@ int main(int argc, const char **argv)
     }
 
     if (strncmp(argv[1], "--version", 9) == 0) {
-        printf("%s\n", VERSION);
+        printf("%s%s\n", VERSION, REVISION);
         exit(EXIT_SUCCESS);
     }
 
