@@ -11,6 +11,10 @@ project(
   },
 )
 
+genconfig_data = configuration_data()
+genconfig_data.set_quoted('VERSION', meson.project_version())
+genconfig = configure_file(output: 'genconfig.h', configuration: genconfig_data)
+
 public_includes = include_directories('include')
 
 clip_dep = declare_dependency(sources: files('source/libs/clip.c'))
@@ -21,15 +25,18 @@ fileio_dep = declare_dependency(sources: files('source/libs/fileio.c'), dependen
 
 executable(
   'nitrorom',
-  sources: files(
-    'source/main.c',
-    'source/packer.c',
-    'source/parse/cfg_arm.c',
-    'source/parse/cfg_banner.c',
-    'source/parse/cfg_header.c',
-    'source/parse/cfg_rom.c',
-    'source/parse/csv_addfile.c',
-  ),
+  sources: [
+    files(
+      'source/main.c',
+      'source/packer.c',
+      'source/parse/cfg_arm.c',
+      'source/parse/cfg_banner.c',
+      'source/parse/cfg_header.c',
+      'source/parse/cfg_rom.c',
+      'source/parse/csv_addfile.c',
+    ),
+    genconfig,
+  ],
   include_directories: public_includes,
   dependencies: [
     clip_dep,

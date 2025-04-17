@@ -11,6 +11,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "genconfig.h" // generated at build-time
+
 #include "clip.h"
 #include "config.h"
 #include "constants.h"
@@ -76,6 +78,11 @@ int main(int argc, const char **argv)
 {
     if (argc <= 1 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--help", 6) == 0) {
         showusage(stdout);
+        exit(EXIT_SUCCESS);
+    }
+
+    if (strncmp(argv[1], "--version", 9) == 0) {
+        printf("%s\n", VERSION);
         exit(EXIT_SUCCESS);
     }
 
@@ -155,6 +162,10 @@ static void showusage(FILE *stream)
     fprintf(stream, "\n");
     fprintf(stream, "For details on the precise format of CONFIG.INI and FILESYS.CSV, refer to\n");
     fprintf(stream, "this program's manual page.\n");
+    fprintf(stream, "\n");
+    fprintf(stream, "Program Information (must be specified first):\n");
+    fprintf(stream, "  -h / --help            Display this help-text and exit.\n");
+    fprintf(stream, "  --version              Display the program's version number and exit.\n");
     fprintf(stream, "\n");
     fprintf(stream, "Options:\n");
     fprintf(stream, "  -C / --directory DIR   Change to directory DIR before loading any files.\n");
