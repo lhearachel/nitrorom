@@ -30,7 +30,8 @@ still in an alpha-stage where many breaking-changes are anticipated.
 Developers and early-adopters can build the project from source:
 
 1. If you have not already, install `meson` using either [their official
-   instructions][getting-meson] or [your package manager][repology-meson].
+   instructions][getting-meson], [your package manager][repology-meson], or the
+   [`requirements.txt`](./requirements.txt) included with the repository.
 2. Clone the repository.
 3. Configure the project's build as you like using Meson:
 

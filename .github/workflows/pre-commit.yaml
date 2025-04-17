@@ -1,0 +1,32 @@
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main, test-*]
+
+env:
+  BUILD_DIR: build
+  CC_JSON: compile_commands.json
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+          cache: pip
+      - name: install dependencies
+        run: python -m pip install --upgrade pip meson
+      - name: configure build
+        run: meson setup "$BUILD_DIR"
+      - name: build the project
+        run: meson compile -C "$BUILD_DIR"
+      - name: run test suites
+        run: meson test -C "$BUILD_DIR"
+      - name: link compilation database
+        run: ln -s "$BUILD_DIR/$CC_JSON" "$CC_JSON"
+      - uses: pre-commit/action@v3.0.1
+      - uses: pre-commit-ci/lite-action@v1.1.0
+        if: always()
