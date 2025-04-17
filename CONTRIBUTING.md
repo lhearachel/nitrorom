@@ -40,6 +40,20 @@ file from your project folder:
 ln -s build/compile_commands.json compile_commands.json
 ```
 
+The repository provides some configuration for the following developer tools to
+enforce some basic rules for code formatting, sanitation, and repository state:
+
+- [`clang-tools`][clang-tools] - code formatting and static analysis
+- [`editorconfig`][editorconfig] - standardized editor configuration
+- [`pre-commit`][pre-commit] - enforce rules as part of commit workflows
+
+Contributions to this repository must adhere to the standards enforced by these
+tools.
+
+[clang-tools]: https://clang.llvm.org/docs/ClangTools.html
+[editorconfig]: https://editorconfig.org/
+[pre-commit]: https://pre-commit.com/
+
 ## How do I run automated tests?
 
 Meson comes with a built-in test harness. Code for the drivers is stored in the
