@@ -79,17 +79,7 @@ int main(int argc, const char **argv)
         exit(EXIT_SUCCESS);
     }
 
-    args args = parseargs(argv);
-
-#ifndef NDEBUG
-    printf("config:  %s\n", args.config);
-    printf("files:   %s\n", args.files);
-    printf("workdir: %s\n", args.workdir);
-    printf("outfile: %s\n", args.outfile);
-    printf("dryrun?  %s\n", args.dryrun ? "yes" : "no");
-    printf("verbose? %s\n", args.verbose ? "yes" : "no");
-#endif // NDEBUG
-
+    args   args    = parseargs(argv);
     string cfgfile = tryfload(args.config);
     string csvfile = tryfload(args.files);
     FILE  *outfile = NULL;
