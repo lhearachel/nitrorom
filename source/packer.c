@@ -2,6 +2,7 @@
 
 #include "packer.h"
 
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -122,28 +123,28 @@ static int comparefnames(const void *a, const void *b) // NOLINT
 
 #define membsize(__memb) ((__memb)->size + (__memb)->pad)
 
-#define printmemb(__curs, __memb)                            \
-    {                                                        \
-        fprintf(                                             \
-            stderr,                                          \
-            "rompacker:member: 0x%08X,0x%08X,0x%08X,%.*s\n", \
-            __curs,                                          \
-            (__memb)->size,                                  \
-            membsize(__memb),                                \
-            fmtstring((__memb)->source.filename)             \
-        );                                                   \
+#define printmemb(__curs, __memb)                                     \
+    {                                                                 \
+        fprintf(                                                      \
+            stderr,                                                   \
+            "rompacker:member: 0x%08" PRIX64 ",0x%08X,0x%08X,%.*s\n", \
+            __curs,                                                   \
+            (__memb)->size,                                           \
+            membsize(__memb),                                         \
+            fmtstring((__memb)->source.filename)                      \
+        );                                                            \
     }
 
-#define printfile(__curs, __file)                            \
-    {                                                        \
-        fprintf(                                             \
-            stderr,                                          \
-            "rompacker:member: 0x%08X,0x%08X,0x%08X,%.*s\n", \
-            __curs,                                          \
-            (__file)->size,                                  \
-            membsize(__file),                                \
-            fmtstring((__file)->target)                      \
-        );                                                   \
+#define printfile(__curs, __file)                                     \
+    {                                                                 \
+        fprintf(                                                      \
+            stderr,                                                   \
+            "rompacker:member: 0x%08" PRIX64 ",0x%08X,0x%08X,%.*s\n", \
+            __curs,                                                   \
+            (__file)->size,                                           \
+            membsize(__file),                                         \
+            fmtstring((__file)->target)                               \
+        );                                                            \
     }
 
 #define sealarmparams(__packer, __n)                                         \
@@ -163,7 +164,7 @@ static void sealarm(
     int            which,
     unsigned char *header, // NOLINT
     unsigned char *fatb,   // NOLINT
-    uint32_t      *romcursor,
+    uint64_t      *romcursor,
     int            ovyofs, // NOLINT
     int            verbose // NOLINT
 )
@@ -315,7 +316,7 @@ static void sealfntb(rompacker *packer, romfile *sorted, int fileid)
     free(dirtree->data);
 }
 
-static int sealheader(rompacker *packer, uint32_t romsize)
+static int sealheader(rompacker *packer, uint64_t romsize)
 {
     unsigned char *header = packer->header.source.buf;
 
@@ -344,10 +345,10 @@ static int sealheader(rompacker *packer, uint32_t romsize)
     if (packer->verbose) {
         fprintf(
             stderr,
-            "rompacker: storage: 0x%08X used / 0x%08X avail (%f%%)\n",
+            "rompacker: storage: 0x%08" PRIX64 " used / 0x%08X avail (%f%%)\n",
             romsize,
             (trycap << shift),
-            romsize / (double)(trycap << shift)
+            (double)romsize / (trycap << shift)
         );
     }
 
@@ -390,7 +391,7 @@ int rompacker_seal(rompacker *packer)
         packer->fatb.pad             = -(packer->fatb.size) & (ROM_ALIGN - 1);
     }
 
-    uint32_t       romcursor = HEADER_BSIZE;
+    uint64_t       romcursor = HEADER_BSIZE;
     unsigned char *fatb      = packer->fatb.source.buf;
     unsigned char *header    = packer->header.source.buf;
     sealarm(sealarmparams(packer, 9), header, fatb, &romcursor, 0, packer->verbose);
@@ -427,7 +428,7 @@ int rompacker_seal(rompacker *packer)
 
     // Final ROM size must ignore the padding of the last-added member (either the banner or the
     // last filesystem entry).
-    uint32_t romsize = romcursor;
+    uint64_t romsize = romcursor;
     if (packer->filesys.len > 0) {
         romsize -= get(&packer->filesys, romfile, packer->filesys.len - 1)->pad;
     } else {
