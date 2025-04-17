@@ -30,7 +30,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "strings.h"
+#include "libs/strings.h"
 
 enum cfgerror {
     E_config_none = 0,   // no error occurred during parsing

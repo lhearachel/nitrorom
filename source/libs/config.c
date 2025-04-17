@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-#include "config.h"
+#include "libs/config.h"
 
 #include <stdio.h>
 
-#include "strings.h"
+#include "libs/strings.h"
 
 #define cfgresult(__code, __pos, __msg)                  \
     (cfgresult)                                          \

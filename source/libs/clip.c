@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-#include "clip.h"
+#include "libs/clip.h"
 
 #include <stdio.h>
 #include <stdlib.h>

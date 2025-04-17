@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-#include "strings.h"
+#include "libs/strings.h"
 
 int space(int c)
 {

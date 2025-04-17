@@ -1,10 +1,11 @@
-#include "sheets.h"
+#include "libs/sheets.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "strings.h"
+#include "libs/strings.h"
 
 #define die0(__msg)             \
     {                           \

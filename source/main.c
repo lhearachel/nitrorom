@@ -11,15 +11,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "genconfig.h" // generated at build-time
-
-#include "clip.h"
 #include "config.h"
 #include "constants.h"
-#include "fileio.h"
 #include "packer.h"
-#include "sheets.h"
-#include "strings.h"
+
+#include "libs/clip.h"
+#include "libs/config.h"
+#include "libs/fileio.h"
+#include "libs/sheets.h"
+#include "libs/strings.h"
 
 #define die(__msg, ...)                        \
     {                                          \

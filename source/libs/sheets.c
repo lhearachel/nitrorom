@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-#include "sheets.h"
+#include "libs/sheets.h"
 
-#include "strings.h"
+#include "libs/strings.h"
 #include <stdio.h>
 
 #define NEWLINE string("\n")

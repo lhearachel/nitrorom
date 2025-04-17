@@ -9,9 +9,10 @@
 #include <string.h>
 
 #include "constants.h"
-#include "litend.h"
-#include "strings.h"
-#include "vector.h"
+
+#include "libs/litend.h"
+#include "libs/strings.h"
+#include "libs/vector.h"
 
 rompacker *rompacker_new(unsigned int verbose)
 {

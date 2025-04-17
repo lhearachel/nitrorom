@@ -1,10 +1,11 @@
-#include "fileio.h"
+#include "libs/fileio.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "strings.h"
+#include "libs/strings.h"
 
 static inline long priv_fsize(FILE *infp)
 {

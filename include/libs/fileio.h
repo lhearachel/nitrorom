@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-#include "strings.h"
+#include "libs/strings.h"
 
 typedef struct file {
     FILE *hdl;

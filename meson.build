@@ -19,10 +19,10 @@ else
   revision_str = ''
 endif
 
-genconfig_data = configuration_data()
-genconfig_data.set_quoted('VERSION', meson.project_version())
-genconfig_data.set_quoted('REVISION', revision_str)
-genconfig = configure_file(output: 'genconfig.h', configuration: genconfig_data)
+config_data = configuration_data()
+config_data.set_quoted('VERSION', meson.project_version())
+config_data.set_quoted('REVISION', revision_str)
+config_h = configure_file(output: 'config.h', configuration: config_data)
 
 public_includes = include_directories('include')
 
@@ -44,7 +44,7 @@ executable(
       'source/parse/cfg_rom.c',
       'source/parse/csv_addfile.c',
     ),
-    genconfig,
+    config_h,
   ],
   include_directories: public_includes,
   dependencies: [

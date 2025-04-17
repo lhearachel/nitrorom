@@ -6,10 +6,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "config.h"
-#include "sheets.h"
-#include "strings.h"
-#include "vector.h"
+#include "libs/config.h"
+#include "libs/sheets.h"
+#include "libs/strings.h"
+#include "libs/vector.h"
 
 typedef struct source {
     string filename;

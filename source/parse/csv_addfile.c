@@ -6,10 +6,11 @@
 #include <stdlib.h> // NOLINT: misc-include-cleaner
 
 #include "constants.h"
-#include "fileio.h"
-#include "sheets.h"
-#include "strings.h"
-#include "vector.h"
+
+#include "libs/fileio.h"
+#include "libs/sheets.h"
+#include "libs/strings.h"
+#include "libs/vector.h"
 
 #define sheetserr(__msg, ...)                                           \
     {                                                                   \

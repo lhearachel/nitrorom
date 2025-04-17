@@ -2,15 +2,17 @@
 
 #include "packer.h"
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "cfgparse.h"
-#include "config.h"
 #include "constants.h"
-#include "litend.h"
-#include "strings.h"
+
+#include "libs/config.h"
+#include "libs/litend.h"
+#include "libs/strings.h"
 
 // clang-format off
 static const strkeyval storagetypes[] = {

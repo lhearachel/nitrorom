@@ -2,17 +2,19 @@
 
 #include "packer.h"
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "cfgparse.h"
-#include "config.h"
 #include "constants.h"
-#include "fileio.h"
-#include "litend.h"
-#include "strings.h"
+
+#include "libs/config.h"
+#include "libs/fileio.h"
+#include "libs/litend.h"
+#include "libs/strings.h"
 
 static cfgresult cfg_banner_version(rompacker *packer, string val, long line)
 {

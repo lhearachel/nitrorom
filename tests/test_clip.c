@@ -1,6 +1,7 @@
-#include "clip.h"
+#include "libs/clip.h"
 
 #include <assert.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

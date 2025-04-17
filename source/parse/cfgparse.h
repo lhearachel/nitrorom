@@ -3,9 +3,12 @@
 #ifndef CFGPARSE_H
 #define CFGPARSE_H
 
-#include "config.h"
+#include <stdio.h>
+
 #include "packer.h"
-#include "strings.h"
+
+#include "libs/config.h"
+#include "libs/strings.h"
 
 #define configerr(__msg, ...)                                        \
     {                                                                \

@@ -38,7 +38,7 @@
 #ifndef SHEETS_H
 #define SHEETS_H
 
-#include "strings.h"
+#include "libs/strings.h"
 
 #define SHEETS_MAX_FIELDS 64
 

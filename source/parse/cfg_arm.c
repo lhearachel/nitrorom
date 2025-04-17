@@ -2,17 +2,19 @@
 
 #include "packer.h"
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "cfgparse.h"
-#include "config.h"
 #include "constants.h"
-#include "fileio.h"
-#include "strings.h"
-#include "vector.h"
+
+#include "libs/config.h"
+#include "libs/fileio.h"
+#include "libs/strings.h"
+#include "libs/vector.h"
 
 // NOTE: This performs an allocation that may *appear* to be left dangling, but we employ a trick:
 // The first element of the vector points to the beginning of the allocated region, so freeing the
