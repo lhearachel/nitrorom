@@ -1,8 +1,14 @@
+# LSP artifacts
 .cache/
 .vscode/
-build/
-temp/
-legacy/
 
-compile_commands.json
+# Build artifacts
+build/
 *.nds
+
+# Developer conveniences
+testdir/
+compile_commands.json
+
+# Meson subprojects
+subprojects/libpng-*/
