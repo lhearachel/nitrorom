@@ -41,7 +41,8 @@ executable(
   'nitrorom',
   sources: [
     files(
-      'source/main.c',
+      'source/nitrorom.c',
+      'source/nitrorom_pack.c',
       'source/packer.c',
       'source/parse/cfg_arm.c',
       'source/parse/cfg_banner.c',

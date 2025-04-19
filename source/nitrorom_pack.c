@@ -4,6 +4,8 @@
  * nitrorom-pack - Produce a Nintendo DS ROM from sources
  */
 
+#include "nitrorom.h"
+
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -11,7 +13,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "constants.h"
 #include "packer.h"
 
@@ -21,31 +22,7 @@
 #include "libs/sheets.h"
 #include "libs/strings.h"
 
-#define die(__msg, ...)                        \
-    {                                          \
-        fputs("nitrorom: ", stderr);           \
-        fprintf(stderr, __msg, ##__VA_ARGS__); \
-        fputc('\n', stderr);                   \
-        exit(EXIT_FAILURE);                    \
-    }
-
-#define dieusage(__msg, ...)                 \
-    {                                        \
-        fputs("nitrorom: ", stderr);         \
-        fprintf(stderr, __msg, __VA_ARGS__); \
-        fputs("\n\n", stderr);               \
-        showusage(stderr);                   \
-        exit(EXIT_FAILURE);                  \
-    }
-
-#define dieiferr(__cond, __resT)                \
-    {                                           \
-        __resT __res = __cond;                  \
-        if (__res.code != 0) {                  \
-            fprintf(stderr, "%s\n", __res.msg); \
-            exit(EXIT_FAILURE);                 \
-        }                                       \
-    }
+#define PROGRAM_NAME "nitrorom-pack"
 
 typedef struct args {
     const char *config;
@@ -74,15 +51,10 @@ static string tryfload(const char *filename);
 
 #define dumpargs(__memb) (__memb).source.buf, (__memb).size
 
-int main(int argc, const char **argv)
+int nitrorom_pack(int argc, const char **argv)
 {
     if (argc <= 1 || strncmp(argv[1], "-h", 2) == 0 || strncmp(argv[1], "--help", 6) == 0) {
         showusage(stdout);
-        exit(EXIT_SUCCESS);
-    }
-
-    if (strncmp(argv[1], "--version", 9) == 0) {
-        printf("%s%s\n", VERSION, REVISION);
         exit(EXIT_SUCCESS);
     }
 
@@ -156,16 +128,12 @@ static args parseargs(const char **argv)
 
 static void showusage(FILE *stream)
 {
-    fprintf(stream, "nitrorom - Produce a Nintendo DS ROM from sources\n");
+    fprintf(stream, "nitrorom-pack - Produce a Nintendo DS ROM from sources\n");
     fprintf(stream, "\n");
     fprintf(stream, "Usage: nitrorom [OPTIONS] <CONFIG.INI> <FILESYS.CSV>\n");
     fprintf(stream, "\n");
     fprintf(stream, "For details on the precise format of CONFIG.INI and FILESYS.CSV, refer to\n");
     fprintf(stream, "this program's manual page.\n");
-    fprintf(stream, "\n");
-    fprintf(stream, "Program Information (must be specified first):\n");
-    fprintf(stream, "  -h / --help            Display this help-text and exit.\n");
-    fprintf(stream, "  --version              Display the program's version number and exit.\n");
     fprintf(stream, "\n");
     fprintf(stream, "Options:\n");
     fprintf(stream, "  -C / --directory DIR   Change to directory DIR before loading any files.\n");
@@ -175,6 +143,7 @@ static void showusage(FILE *stream)
     fprintf(stream, "                         header, banner, and filesystem tables.\n");
     fprintf(stream, "  -v / --verbose         Enable verbose mode; emit additional program logs\n");
     fprintf(stream, "                         during execution to standard-error.\n");
+    fprintf(stream, "  -h / --help            Display this help-text and exit.\n");
 }
 
 static string tryfload(const char *filename)
