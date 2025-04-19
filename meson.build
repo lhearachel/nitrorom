@@ -11,6 +11,8 @@ project(
   },
 )
 
+native = meson.is_cross_build() ? false : true
+
 if get_option('buildtype').startswith('debug')
   git_exe = find_program('git')
   revision_id = run_command(git_exe, 'rev-parse', '--short', 'HEAD', check: true).stdout().strip()
@@ -26,7 +28,7 @@ config_h = configure_file(output: 'config.h', configuration: config_data)
 
 public_includes = include_directories('include')
 
-libpng_dep = dependency('libpng')
+libpng_dep = dependency('libpng', native: native)
 
 clip_dep = declare_dependency(sources: files('source/libs/clip.c'))
 strings_dep = declare_dependency(sources: files('source/libs/strings.c'))
@@ -48,6 +50,7 @@ executable(
     ),
     config_h,
   ],
+  native: native,
   include_directories: public_includes,
   dependencies: [
     libpng_dep,
