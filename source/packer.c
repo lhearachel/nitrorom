@@ -357,20 +357,21 @@ static int sealheader(rompacker *packer, uint64_t romsize)
 
 static void sealbanner(rompacker *packer)
 {
-    unsigned char *banner = packer->banner.source.buf;
+    unsigned char *banner    = packer->banner.source.buf;
+    unsigned char *crcregion = banner + OFS_BANNER_ICON_BITMAP;
 
-    uint16_t crc = crc16(string(banner + 0x20, BANNER_BSIZE_V1 - 0x20), 0xFFFF);
+    uint16_t crc = crc16(string(crcregion, BANNER_BSIZE_V1 - OFS_BANNER_ICON_BITMAP), 0xFFFF);
     putleword(banner + OFS_BANNER_CRC_V1OFFSET, crc);
     if (packer->verbose) fprintf(stderr, "rompacker: banner v1 CRC: 0x%04X\n", crc);
 
     if (packer->bannerver > 1) {
-        crc = crc16(string(banner + 0x20, BANNER_BSIZE_V2 - 0x20), 0xFFFF);
+        crc = crc16(string(crcregion, BANNER_BSIZE_V2 - OFS_BANNER_ICON_BITMAP), 0xFFFF);
         putleword(banner + OFS_BANNER_CRC_V2OFFSET, crc);
         if (packer->verbose) fprintf(stderr, "rompacker: banner v2 CRC: 0x%04X\n", crc);
     }
 
     if (packer->bannerver > 2) {
-        crc = crc16(string(banner + 0x20, BANNER_BSIZE_V3 - 0x20), 0xFFFF);
+        crc = crc16(string(crcregion, BANNER_BSIZE_V3 - OFS_BANNER_ICON_BITMAP), 0xFFFF);
         putleword(banner + OFS_BANNER_CRC_V3OFFSET, crc);
         if (packer->verbose) fprintf(stderr, "rompacker: banner v3 CRC: 0x%04X\n", crc);
     }
