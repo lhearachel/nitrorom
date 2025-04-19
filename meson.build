@@ -3,6 +3,7 @@ project(
   'c',
   license: 'MIT',
   license_files: 'LICENSE',
+  meson_version: '>=1.2.0',
   version: files('.version'),
   default_options: {
     'c_std': 'c99',
@@ -28,7 +29,7 @@ config_h = configure_file(output: 'config.h', configuration: config_data)
 
 public_includes = include_directories('include')
 
-libpng_dep = dependency('libpng', native: native)
+libpng_dep = dependency('libpng', native: native, default_options: {'werror': 'false'})
 
 clip_dep = declare_dependency(sources: files('source/libs/clip.c'))
 strings_dep = declare_dependency(sources: files('source/libs/strings.c'))
