@@ -2,11 +2,15 @@
 
 #include "packer.h"
 
+#include <libpng16/png.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <png.h>
+#include <pngconf.h>
 
 #include "cfgparse.h"
 #include "constants.h"
@@ -108,6 +112,111 @@ static cfgresult cfg_banner_iconpal(rompacker *packer, string val, long line)
         );
     }
 
+    return configok;
+}
+
+#define PNGSIGSIZE 8
+
+#define pngassert(__cond, __file, __errmsg, ...) \
+    {                                            \
+        if (!(__cond)) {                         \
+            fclose(__file);                      \
+            configerr(__errmsg, __VA_ARGS__);    \
+        }                                        \
+    }
+
+#define copytile(__x, __y, __pixels, __tiles)                                                    \
+    {                                                                                            \
+        /* Top-left corner is at (4x, 8y), lower-right corner is at (4x + 4, 8y + 8) */          \
+        /* The pixel buffer is row-ordered; y = 1, then, is pixel 16, y = 2 is pixel 32, etc. */ \
+        for (int __rely = (8 * (__y)); __rely < (8 * (__y)) + 8; __rely++) {                     \
+            for (int __relx = (4 * (__x)); __relx < (4 * (__x)) + 4; __relx++) {                 \
+                unsigned char __pixel = (__pixels)[__rely * 16 + __relx];                        \
+                unsigned char __left  = __pixel >> 4;                                            \
+                unsigned char __right = __pixel & 0xF;                                           \
+                                                                                                 \
+                *(__tiles)++ = (__right << 4) | __left;                                          \
+            }                                                                                    \
+        }                                                                                        \
+    }
+
+static cfgresult cfg_banner_iconpng(rompacker *packer, string val, long line)
+{
+    file ficonpng = fpreps(val);
+    if (ficonpng.size < 0) configerr("could not open icon PNG file “%.*s”", fmtstring(val));
+
+    unsigned char pngsig[PNGSIGSIZE];
+    fread(pngsig, 1, PNGSIGSIZE, ficonpng.hdl);
+    if (!png_check_sig(pngsig, PNGSIGSIZE)) {
+        configerr("icon file “%.*s” is not a PNG", fmtstring(val));
+    }
+
+    png_structp ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!ppng) configerr("error setting up PNG reader for icon file “%.*s”", fmtstring(val));
+
+    png_infop pinfo = png_create_info_struct(ppng);
+    if (!pinfo) {
+        png_destroy_read_struct(&ppng, NULL, NULL);
+        configerr("error setting up PNG info struct for icon file “%.*s”", fmtstring(val));
+    }
+
+    png_init_io(ppng, ficonpng.hdl);
+    png_set_sig_bytes(ppng, PNGSIGSIZE);
+    png_read_info(ppng, pinfo);
+
+    png_colorp    colors;
+    int           ncolors;
+    unsigned char bitdepth  = png_get_bit_depth(ppng, pinfo);
+    unsigned char coltype   = png_get_color_type(ppng, pinfo);
+    uint32_t      width     = png_get_image_width(ppng, pinfo);
+    uint32_t      height    = png_get_image_height(ppng, pinfo);
+    uint32_t      pltechunk = png_get_PLTE(ppng, pinfo, &colors, &ncolors);
+
+    // clang-format off
+    pngassert(coltype == PNG_COLOR_TYPE_PALETTE, ficonpng.hdl, "icon file “%.*s” is not an indexed PNG", fmtstring(val));
+    pngassert(bitdepth == 4, ficonpng.hdl, "icon file “%.*s” has unsupported bitdepth %d", fmtstring(val), bitdepth);
+    pngassert(width == ICON_BITMAP_DIMEN, ficonpng.hdl, "icon file “%.*s” has invalid width %d", fmtstring(val), width);
+    pngassert(height == ICON_BITMAP_DIMEN, ficonpng.hdl, "icon file “%.*s” has invalid height %d", fmtstring(val), height);
+    pngassert(pltechunk == PNG_INFO_PLTE, ficonpng.hdl, "icon file “%.*s” has no palette section", fmtstring(val));
+    pngassert(ncolors <= 16, ficonpng.hdl, "icon file “%.*s” has more than 16 colors", fmtstring(val));
+    // clang-format on
+
+    unsigned char *banner  = packer->banner.source.buf;
+    unsigned char *tiles   = banner + OFS_BANNER_ICON_BITMAP;
+    unsigned char *palette = banner + OFS_BANNER_ICON_PALETTE;
+
+    for (int i = 0; i < ICON_COLOR_DEPTH; i++) {
+        unsigned char r = colors[i].red / 8;
+        unsigned char g = colors[i].green / 8;
+        unsigned char b = colors[i].blue / 8;
+
+        putlehalf(palette, (b << 10) | (g << 5) | r);
+        palette += 2;
+    }
+
+    size_t     rowsize = png_get_rowbytes(ppng, pinfo);
+    uint8_t   *pixels  = malloc(height * rowsize);
+    png_bytepp prows   = (png_bytepp)malloc(height * sizeof(png_bytep));
+    for (uint32_t i = 0; i < height; i++) prows[i] = (png_bytep)(pixels + (i * rowsize));
+
+    png_read_image(ppng, prows);
+    png_destroy_read_struct(&ppng, &pinfo, NULL);
+    free((png_bytep)prows);
+    fclose(ficonpng.hdl);
+
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) copytile(x, y, pixels, tiles);
+    }
+
+    if (packer->verbose) {
+        fprintf(
+            stderr,
+            "rompacker:configuration:banner: loaded “%.*s” as the icon\n",
+            fmtstring(val)
+        );
+    }
+
+    free(pixels);
     return configok;
 }
 
@@ -269,6 +378,7 @@ static const keyvalueparser kvparsers[] = {
     { .key = string("version"),   .parser = cfg_banner_version   },
     { .key = string("icon4bpp"),  .parser = cfg_banner_icon4bpp  },
     { .key = string("iconpal"),   .parser = cfg_banner_iconpal   },
+    { .key = string("icon"),      .parser = cfg_banner_iconpng,  },
     { .key = string("title"),     .parser = cfg_banner_title     },
     { .key = string("subtitle"),  .parser = cfg_banner_subtitle  },
     { .key = string("developer"), .parser = cfg_banner_developer },

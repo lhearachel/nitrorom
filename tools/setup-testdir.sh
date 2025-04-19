@@ -23,6 +23,7 @@ POKEPLATINUM=$(realpath "$2")
 
 mkdir -p "$TESTDIR"
 ln -s "$POKEPLATINUM/platinum.us/rom_header_template.sbin" "$TESTDIR/header_template.sbin"
+ln -s "$POKEPLATINUM/platinum.us/icon.png" "$TESTDIR/icon.png"
 ln -s "$POKEPLATINUM/subprojects/NitroSDK-4.2.30001/components/ichneumon_sub.sbin" "$TESTDIR/sub.sbin"
 ln -s "$POKEPLATINUM/subprojects/NitroSDK-4.2.30001/components/ichneumon_sub_defs.sbin" "$TESTDIR/sub_defs.sbin"
 ln -s "$POKEPLATINUM/build/platinum.us/icon.nbfc" "$TESTDIR/icon.4bpp"

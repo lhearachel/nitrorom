@@ -26,6 +26,8 @@ config_h = configure_file(output: 'config.h', configuration: config_data)
 
 public_includes = include_directories('include')
 
+libpng_dep = dependency('libpng')
+
 clip_dep = declare_dependency(sources: files('source/libs/clip.c'))
 strings_dep = declare_dependency(sources: files('source/libs/strings.c'))
 config_dep = declare_dependency(sources: files('source/libs/config.c'), dependencies: [strings_dep])
@@ -48,6 +50,7 @@ executable(
   ],
   include_directories: public_includes,
   dependencies: [
+    libpng_dep,
     clip_dep,
     config_dep,
     fileio_dep,
