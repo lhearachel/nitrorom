@@ -2,7 +2,6 @@
 
 #include "packer.h"
 
-#include <libpng16/png.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
