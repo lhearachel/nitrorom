@@ -3,7 +3,7 @@
 #ifndef CFGPARSE_H
 #define CFGPARSE_H
 
-#include <stdio.h>
+#include <stdio.h> // NOLINT
 
 #include "packer.h"
 
