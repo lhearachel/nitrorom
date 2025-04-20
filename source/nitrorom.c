@@ -61,5 +61,6 @@ static void showusage(FILE *stream)
     fprintf(stream, "  -v / --version   Display the program's version number and exit.\n");
     fprintf(stream, "\n");
     fprintf(stream, "Commands:\n");
+    fprintf(stream, "  list             List the components of a Nintendo DS ROM\n");
     fprintf(stream, "  pack             Produce a ROM image from source files\n");
 }

@@ -4,13 +4,10 @@ Create Nintendo DS ROM images from a plain-text specification.
 
 ## Table of Contents
 
-<!--toc:start-->
-
 - [Table of Contents](#table-of-contents)
 - [Background](#background)
 - [Install](#install)
 - [Usage](#usage)
-    <!--toc:end-->
 
 ## Background
 
@@ -85,29 +82,22 @@ Developers and early-adopters can build the project from source:
 `nitrorom`'s built-in help text provides a basic overview of its usage.
 
 ```text
-nitrorom - Produce a Nintendo DS ROM from sources
+nitrorom - Interface with Nintendo DS ROM images
 
-Usage: nitrorom [OPTIONS] <CONFIG.INI> <FILESYS.CSV>
-
-For details on the precise format of CONFIG.INI and FILESYS.CSV, refer to
-this program's manual page.
-
-Program Information (must be specified first):
-  -h / --help            Display this help-text and exit.
-  --version              Display the program's version number and exit.
+Usage: nitrorom [OPTIONS] [COMMAND]
 
 Options:
-  -C / --directory DIR   Change to directory DIR before loading any files.
-  -o / --output FILE     Write the output ROM to FILE. Default: “rom.nds”.
-  -d / --dry-run         Enable dry-run mode; do not create an output ROM
-                         and instead emit computed artifacts: the ROM's
-                         header, banner, and filesystem tables.
-  -v / --verbose         Enable verbose mode; emit additional program logs
-                         during execution to standard-error.
+  -h / --help      Display this help-text and exit.
+  -v / --version   Display the program's version number and exit.
+
+Commands:
+  list             List the components of a Nintendo DS ROM
+  pack             Produce a ROM image from source files
 ```
 
-As a reference for the format of the configuration files specified above, some
-examples are available in `examples/`.
+For details on the usage of individual commands, refer to the associated
+documentation in `docs/`. Some example input-files for the `pack` command are
+also provided in `examples/`.
 
 > [!NOTE]
 > More detailed documentation is a work-in-progress as the project evolves.
