@@ -41,4 +41,20 @@ typedef struct strkeyval {
     unsigned int val;
 } strkeyval;
 
+#define varsub(__val, __packer)                                                                 \
+    {                                                                                           \
+        if ((__val).len > 3 && (__val).s[0] == '$' && (__val).s[1] == '{'                       \
+            && (__val).s[(__val).len - 1] == '}') {                                             \
+            string   varkey = string((__val).s + 2, (__val).len - 3);                           \
+            strpair *match  = (__packer)->vardefs->data;                                        \
+            int      i      = 0;                                                                \
+                                                                                                \
+            for (; i < (__packer)->vardefs->len && !strequ(match->head, varkey); i++, match++); \
+            if (i == (__packer)->vardefs->len)                                                  \
+                configerr("found unknown var “%.*s”", fmtstring(varkey));                       \
+                                                                                                \
+            (__val) = match->tail;                                                              \
+        }                                                                                       \
+    }
+
 #endif // CFGPARSE_H

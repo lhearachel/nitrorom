@@ -17,6 +17,7 @@
 
 static cfgresult cfg_header_template(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     string ftemplate = floads(val);
     if (ftemplate.len < 0) configerr("could not open template file “%.*s”", fmtstring(val));
     if (ftemplate.len > HEADER_BSIZE) {
@@ -50,6 +51,7 @@ static inline cfgresult cfg_header_nchars(
     int         ofs   // NOLINT
 )
 {
+    varsub(val, packer);
     if (val.len > nmax) {
         configerr("header %s “%.*s” exceeds maximum length %d", key, fmtstring(val), nmax);
     }
@@ -79,6 +81,7 @@ static cfgresult cfg_header_maker(rompacker *packer, string val, long line)
 
 static cfgresult cfg_header_revision(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     unsigned int result = 0;
     for (long i = 0; i < val.len; i++) {
         int digit = val.s[i] - '0';
@@ -105,6 +108,7 @@ static cfgresult cfg_header_revision(rompacker *packer, string val, long line)
 
 static cfgresult cfg_header_securecrc(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     string par = val;
     if (par.len > 2 && par.s[0] == '0' && (par.s[1] == 'x' || par.s[1] == 'X')) {
         par.s   += 2;

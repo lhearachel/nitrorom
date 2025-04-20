@@ -57,6 +57,8 @@ typedef struct rompacker {
 
     unsigned int tailsize;
 
+    vector *vardefs;
+
     rommember header;  // intermediate (optional template)
     rommember arm9;    // from disk (required)
     rommember ovt9;    // from disk (optional)
@@ -75,7 +77,7 @@ enum dumperr {
     E_dump_packing,
 };
 
-rompacker   *rompacker_new(unsigned int verbose);
+rompacker   *rompacker_new(unsigned int verbose, vector *vardefs);
 void         rompacker_del(rompacker *packer);
 int          rompacker_seal(rompacker *packer);
 enum dumperr rompacker_dump(rompacker *packer, FILE *stream);

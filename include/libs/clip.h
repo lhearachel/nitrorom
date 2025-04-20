@@ -67,7 +67,7 @@
 #ifndef CLIP_H
 #define CLIP_H
 
-#define LEN_CLIP_ERR 64
+#define LEN_CLIP_ERR 128
 
 typedef enum hasarg {
     H_noarg = 0,
@@ -82,7 +82,7 @@ typedef enum cliperr {
     E_clip_notarget,
     E_clip_missingpos,
 
-    E_user_err = 128, // user-defined errors can be specified starting from here
+    E_clip_user = 128, // user-defined errors can be specified starting from here
 } cliperr;
 
 typedef struct clip {

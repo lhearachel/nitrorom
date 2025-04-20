@@ -70,6 +70,7 @@ static inline cfgresult cfg_arm_prepfile(
     const char *key  // NOLINT
 )
 {
+    varsub(val, packer);
     file fhandle = fpreps(val);
     if (fhandle.size < 0) configerr("could not open %s file “%.*s”", key, fmtstring(val));
 
@@ -97,6 +98,7 @@ static cfgresult cfg_arm9_staticbinary(rompacker *packer, string val, long line)
 
 static cfgresult cfg_arm9_definitions(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     file fdefinitions = fpreps(val);
     if (fdefinitions.size < 0) {
         configerr("could not open arm9 definitions file “%.*s”", fmtstring(val));
@@ -128,6 +130,7 @@ static cfgresult cfg_arm7_staticbinary(rompacker *packer, string val, long line)
 
 static cfgresult cfg_arm7_definitions(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     file fdefinitions = fpreps(val);
     if (fdefinitions.size < 0) {
         configerr("could not open arm7 definitions file “%.*s”", fmtstring(val));

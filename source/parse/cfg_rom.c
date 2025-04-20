@@ -34,6 +34,7 @@ static const strkeyval booleans[] = {
 
 static cfgresult cfg_rom_storagetype(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     const strkeyval *match = &storagetypes[0];
     for (; match->smatch.len > 0 && !strequ(val, match->smatch); match++);
     if (match->smatch.len <= 0) {
@@ -61,6 +62,7 @@ static cfgresult cfg_rom_storagetype(rompacker *packer, string val, long line)
 
 static cfgresult cfg_rom_filltail(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     const strkeyval *match = &booleans[0];
     for (; match->smatch.len > 0 && !strequ(val, match->smatch); match++);
     if (match->smatch.len <= 0) {
@@ -77,6 +79,7 @@ static cfgresult cfg_rom_filltail(rompacker *packer, string val, long line)
 
 static cfgresult cfg_rom_fillwith(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     string par = val;
     if (par.len > 2 && par.s[0] == '0' && (par.s[1] == 'x' || par.s[1] == 'X')) {
         par.s   += 2;

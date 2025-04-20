@@ -21,6 +21,7 @@
 
 static cfgresult cfg_banner_version(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     unsigned int result = 0;
     for (long i = 0; i < val.len; i++) {
         int digit = val.s[i] - '0';
@@ -60,6 +61,7 @@ static cfgresult cfg_banner_version(rompacker *packer, string val, long line)
 
 static cfgresult cfg_banner_icon4bpp(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     string ficon4bpp = floads(val);
     if (ficon4bpp.len < 0) configerr("could not open icon bitmap file “%.*s”", fmtstring(val));
     if (ficon4bpp.len > (long)ICON_BITMAP_BSIZE) {
@@ -88,6 +90,7 @@ static cfgresult cfg_banner_icon4bpp(rompacker *packer, string val, long line)
 
 static cfgresult cfg_banner_iconpal(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     string ficonpal = floads(val);
     if (ficonpal.len < 0) configerr("could not open icon palette file “%.*s”", fmtstring(val));
     if (ficonpal.len > (long)ICON_PALETTE_BSIZE) {
@@ -141,6 +144,7 @@ static cfgresult cfg_banner_iconpal(rompacker *packer, string val, long line)
 
 static cfgresult cfg_banner_iconpng(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     file ficonpng = fpreps(val);
     if (ficonpng.size < 0) configerr("could not open icon PNG file “%.*s”", fmtstring(val));
 
@@ -274,6 +278,7 @@ static inline void *utf8dec(void *s, long *c)
 
 static inline cfgresult cfg_banner_titlepart(rompacker *packer, string val, long line)
 {
+    varsub(val, packer);
     unsigned char *curr   = val.s;
     unsigned char *banner = packer->banner.source.buf;
     while (curr - val.s < val.len && packer->endbannertitle < BANNER_TITLE_BSIZE) {

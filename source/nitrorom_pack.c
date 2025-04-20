@@ -21,6 +21,7 @@
 #include "libs/fileio.h"
 #include "libs/sheets.h"
 #include "libs/strings.h"
+#include "libs/vector.h"
 
 #define PROGRAM_NAME "nitrorom-pack"
 
@@ -29,6 +30,8 @@ typedef struct args {
     const char *files;
     const char *workdir;
     const char *outfile;
+
+    vector vardefs;
 
     long dryrun;
     long verbose;
@@ -69,7 +72,7 @@ int nitrorom_pack(int argc, const char **argv)
 
     chdir(args.workdir);
 
-    rompacker *packer = rompacker_new((unsigned int)args.verbose);
+    rompacker *packer = rompacker_new((unsigned int)args.verbose, &args.vardefs);
     dieiferr(cfgparse(cfgfile, cfgsections, packer), cfgresult);
     dieiferr(csvparse(csvfile, NULL, csv_addfile, packer), sheetsresult);
 
@@ -95,8 +98,51 @@ int nitrorom_pack(int argc, const char **argv)
     rompacker_del(packer);
     free(cfgfile.s);
     free(csvfile.s);
+    free(args.vardefs.data);
     if (outfile) fclose(outfile);
     exit(EXIT_SUCCESS);
+}
+
+enum cliperr_user {
+    E_clip_noequ = E_clip_user,
+    E_clip_varset,
+};
+
+static int adddefinition(clip *clip, const clipopt *opt, const char *option, void *user)
+{
+    (void)user;
+    (void)opt;
+
+    string  keyval = string(clip->arg, strlen(clip->arg));
+    strpair kvpair = strcut(keyval, '=');
+    if (kvpair.tail.len <= 0) {
+        snprintf(
+            clip->err,
+            sizeof(clip->err),
+            "missing key-value separator “=” for option “%s”",
+            option
+        );
+        return E_clip_noequ;
+    }
+
+    vector *vardefs = user;
+    for (int i = 0; i < vardefs->len; i++) {
+        strpair *pair = get(vardefs, strpair, i);
+        if (strequ(pair->head, kvpair.head)) {
+            snprintf(
+                clip->err,
+                sizeof(clip->err),
+                "variable “%.*s” is already set",
+                fmtstring(kvpair.head)
+            );
+            return E_clip_varset;
+        }
+    }
+
+    strpair *pair = push(vardefs, strpair);
+    pair->head    = kvpair.head;
+    pair->tail    = kvpair.tail;
+    return E_clip_none;
 }
 
 static args parseargs(const char **argv)
@@ -104,9 +150,11 @@ static args parseargs(const char **argv)
     args args    = { 0 };
     args.workdir = ".";
     args.outfile = "rom.nds";
+    args.vardefs = newvec(strpair, 32);
 
     // clang-format off
     const clipopt options[] = {
+        { .longopt = "define",    .shortopt = 'D', .hasarg = H_reqarg, .handler = adddefinition },
         { .longopt = "directory", .shortopt = 'C', .hasarg = H_reqarg, .starget = &args.workdir },
         { .longopt = "output",    .shortopt = 'o', .hasarg = H_reqarg, .starget = &args.outfile },
         { .longopt = "dry-run",   .shortopt = 'd', .hasarg = H_noarg,  .ntarget = &args.dryrun  },
@@ -122,7 +170,7 @@ static args parseargs(const char **argv)
     // clang-format on
 
     clip clip = clipinit(argv);
-    if (cliparse(&clip, options, positionals, NULL)) dieusage("%s", clip.err);
+    if (cliparse(&clip, options, positionals, &args.vardefs)) dieusage("%s", clip.err);
     return args;
 }
 
@@ -132,10 +180,11 @@ static void showusage(FILE *stream)
     fprintf(stream, "\n");
     fprintf(stream, "Usage: nitrorom pack [OPTIONS] <CONFIG.INI> <FILESYS.CSV>\n");
     fprintf(stream, "\n");
-    fprintf(stream, "For details on the precise format of CONFIG.INI and FILESYS.CSV, refer to\n");
-    fprintf(stream, "this program's manual page.\n");
-    fprintf(stream, "\n");
     fprintf(stream, "Options:\n");
+    fprintf(stream, "  -D / --define KEY=VAL  Define a key-value pair to be used when parsing\n");
+    fprintf(stream, "                         program configuration. Keys must be unique and\n");
+    fprintf(stream, "                         are identified in CONFIG.INI with shell-style\n");
+    fprintf(stream, "                         wrapping, e.g. `${KEY}`.\n");
     fprintf(stream, "  -C / --directory DIR   Change to directory DIR before loading any files.\n");
     fprintf(stream, "  -o / --output FILE     Write the output ROM to FILE. Default: “rom.nds”.\n");
     fprintf(stream, "  -d / --dry-run         Enable dry-run mode; do not create an output ROM\n");

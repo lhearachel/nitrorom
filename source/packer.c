@@ -15,7 +15,7 @@
 #include "libs/strings.h"
 #include "libs/vector.h"
 
-rompacker *rompacker_new(unsigned int verbose)
+rompacker *rompacker_new(unsigned int verbose, vector *vardefs)
 {
     rompacker *packer = calloc(1, sizeof(*packer));
     if (!packer) return 0;
@@ -31,6 +31,7 @@ rompacker *rompacker_new(unsigned int verbose)
     packer->ovy9    = newvec(rommember, 128);
     packer->ovy7    = newvec(rommember, 128);
     packer->filesys = newvec(romfile, 512);
+    packer->vardefs = vardefs;
 
     return packer;
 }
