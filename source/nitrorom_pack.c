@@ -154,11 +154,11 @@ static args parseargs(const char **argv)
 
     // clang-format off
     const clipopt options[] = {
-        { .longopt = "define",    .shortopt = 'D', .hasarg = H_reqarg, .handler = adddefinition },
-        { .longopt = "directory", .shortopt = 'C', .hasarg = H_reqarg, .starget = &args.workdir },
-        { .longopt = "output",    .shortopt = 'o', .hasarg = H_reqarg, .starget = &args.outfile },
-        { .longopt = "dry-run",   .shortopt = 'd', .hasarg = H_noarg,  .ntarget = &args.dryrun  },
-        { .longopt = "verbose",   .shortopt = 'v', .hasarg = H_noarg,  .ntarget = &args.verbose },
+        { .longopt = "define",    .shortopt = 'D',  .hasarg = H_reqarg, .handler = adddefinition },
+        { .longopt = "directory", .shortopt = 'C',  .hasarg = H_reqarg, .starget = &args.workdir },
+        { .longopt = "output",    .shortopt = 'o',  .hasarg = H_reqarg, .starget = &args.outfile },
+        { .longopt = "dry-run",   .shortopt = '\0', .hasarg = H_noarg,  .ntarget = &args.dryrun  },
+        { .longopt = "verbose",   .shortopt = '\0', .hasarg = H_noarg,  .ntarget = &args.verbose },
         { 0 },
     };
 
@@ -187,10 +187,10 @@ static void showusage(FILE *stream)
     fprintf(stream, "                         wrapping, e.g. `${KEY}`.\n");
     fprintf(stream, "  -C / --directory DIR   Change to directory DIR before loading any files.\n");
     fprintf(stream, "  -o / --output FILE     Write the output ROM to FILE. Default: “rom.nds”.\n");
-    fprintf(stream, "  -d / --dry-run         Enable dry-run mode; do not create an output ROM\n");
+    fprintf(stream, "  --dry-run              Enable dry-run mode; do not create an output ROM\n");
     fprintf(stream, "                         and instead emit computed artifacts: the ROM's\n");
     fprintf(stream, "                         header, banner, and filesystem tables.\n");
-    fprintf(stream, "  -v / --verbose         Enable verbose mode; emit additional program logs\n");
+    fprintf(stream, "  --verbose              Enable verbose mode; emit additional program logs\n");
     fprintf(stream, "                         during execution to standard-error.\n");
     fprintf(stream, "  -h / --help            Display this help-text and exit.\n");
 }
