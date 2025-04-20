@@ -10,7 +10,7 @@ Create Nintendo DS ROM images from a plain-text specification.
 - [Background](#background)
 - [Install](#install)
 - [Usage](#usage)
-      <!--toc:end-->
+    <!--toc:end-->
 
 ## Background
 
@@ -51,13 +51,16 @@ Developers and early-adopters can build the project from source:
 
     ```sh
     # Use -O0 with debug symbols
-    meson setup build
+    meson setup --buildtype debug build
 
     # Use -O2 with debug symbols
     meson setup --buildtype debugoptimized build
 
+    # Use -O3 and strip debug symbols
+    meson setup --buildtype release build
+
     # Link the project against Address Sanitizer for richer crash reports
-    meson setup -Db_sanitize=address build
+    meson setup -Db_sanitize=address --buildtype debug build
     ```
 
 5. Use Meson to invoke the build:

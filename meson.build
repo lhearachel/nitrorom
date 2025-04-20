@@ -7,6 +7,7 @@ project(
   version: files('.version'),
   default_options: {
     'c_std': 'c99',
+    'buildtype': 'release',
     'warning_level': '2',
     'werror': 'true',
   },
