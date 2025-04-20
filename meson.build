@@ -42,6 +42,7 @@ executable(
   sources: [
     files(
       'source/nitrorom.c',
+      'source/nitrorom_list.c',
       'source/nitrorom_pack.c',
       'source/packer.c',
       'source/parse/cfg_arm.c',

@@ -8,6 +8,7 @@
 #ifndef LITEND_H
 #define LITEND_H
 
+#include <stdint.h>
 #define putleword(__dest, __word)              \
     {                                          \
         (__dest)[0] = (__word) & 0xFF;         \
@@ -23,5 +24,12 @@
     }
 
 #define lehalf(__src) ((__src)[0] | ((__src)[1] << 8))
+
+static inline uint32_t leword(unsigned char buf[])
+{
+    uint32_t highest   = buf[3]; // have to do it this way to avoid undefined behavior
+    highest          <<= 24;
+    return buf[0] | buf[1] << 8 | buf[2] << 16 | highest;
+}
 
 #endif // LITEND_H

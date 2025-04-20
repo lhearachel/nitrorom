@@ -130,7 +130,7 @@ static void showusage(FILE *stream)
 {
     fprintf(stream, "nitrorom-pack - Produce a Nintendo DS ROM from sources\n");
     fprintf(stream, "\n");
-    fprintf(stream, "Usage: nitrorom [OPTIONS] <CONFIG.INI> <FILESYS.CSV>\n");
+    fprintf(stream, "Usage: nitrorom pack [OPTIONS] <CONFIG.INI> <FILESYS.CSV>\n");
     fprintf(stream, "\n");
     fprintf(stream, "For details on the precise format of CONFIG.INI and FILESYS.CSV, refer to\n");
     fprintf(stream, "this program's manual page.\n");

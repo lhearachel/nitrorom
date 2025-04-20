@@ -11,6 +11,7 @@
 #define PROGRAM_NAME "nitrorom"
 
 static void showusage(FILE *stream);
+extern int  nitrorom_list(int argc, const char **argv);
 extern int  nitrorom_pack(int argc, const char **argv);
 
 typedef int (*commandfunc)(int argc, const char **argv);
@@ -22,6 +23,7 @@ typedef struct command {
 
 // clang-format off
 static const command commands[] = {
+    { .name = "list", .func = nitrorom_list },
     { .name = "pack", .func = nitrorom_pack },
     { 0 },
 };
