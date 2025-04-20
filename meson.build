@@ -1,5 +1,5 @@
 project(
-  'nitrokit',
+  'nitrorom',
   'c',
   license: 'MIT',
   license_files: 'LICENSE',
@@ -12,7 +12,8 @@ project(
   },
 )
 
-native = meson.is_cross_build() ? false : true
+native = get_option('native')
+install = native and meson.is_cross_build() ? false : true
 
 if get_option('buildtype').startswith('debug')
   git_exe = find_program('git')
@@ -37,7 +38,7 @@ config_dep = declare_dependency(sources: files('source/libs/config.c'), dependen
 sheets_dep = declare_dependency(sources: files('source/libs/sheets.c'), dependencies: [strings_dep])
 fileio_dep = declare_dependency(sources: files('source/libs/fileio.c'), dependencies: [strings_dep])
 
-executable(
+nitrorom_exe = executable(
   'nitrorom',
   sources: [
     files(
@@ -54,6 +55,7 @@ executable(
     config_h,
   ],
   native: native,
+  install: install,
   include_directories: public_includes,
   dependencies: [
     libpng_dep,
@@ -65,4 +67,8 @@ executable(
   ],
 )
 
-subdir('tests')
+if not meson.is_subproject()
+  subdir('tests')
+else
+  meson.override_find_program('nitrorom', nitrorom_exe)
+endif
