@@ -10,7 +10,7 @@ Create Nintendo DS ROM images from a plain-text specification.
 - [Background](#background)
 - [Install](#install)
 - [Usage](#usage)
-  <!--toc:end-->
+      <!--toc:end-->
 
 ## Background
 
@@ -32,8 +32,22 @@ Developers and early-adopters can build the project from source:
 
 1. If you have not already, install `meson` using either [their official
    instructions][getting-meson] or [your package manager][repology-meson].
-2. Clone the repository.
-3. Configure the project's build as you like using Meson:
+2. If you have not already, [install `libpng`][repology-libpng].
+
+    > [!WARNING]
+    > Developers working on MSYS2 will need to compile `libpng` from source;
+    > after downloading a source archive:
+    >
+    > ```bash
+    > tar xf libpng-<version>.tar.xz
+    > cd libpng-<version>
+    > ./configure --prefix=/usr
+    > make check
+    > make install
+    > ```
+
+3. Clone the repository.
+4. Configure the project's build as you like using Meson:
 
     ```sh
     # Use -O0 with debug symbols
@@ -46,13 +60,13 @@ Developers and early-adopters can build the project from source:
     meson setup -Db_sanitize=address build
     ```
 
-4. Use Meson to invoke the build:
+5. Use Meson to invoke the build:
 
     ```sh
     meson compile -C build
     ```
 
-5. Verify that you have successfully built the executable by invoking it with no
+6. Verify that you have successfully built the executable by invoking it with no
    arguments, which will display the program's help text:
 
     ```sh
@@ -61,6 +75,7 @@ Developers and early-adopters can build the project from source:
 
 [getting-meson]: https://mesonbuild.com/Getting-meson.html
 [repology-meson]: https://repology.org/project/meson/versions
+[repology-libpng]: https://repology.org/project/libpng/versions
 
 ## Usage
 

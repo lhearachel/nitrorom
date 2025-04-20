@@ -29,11 +29,7 @@ config_h = configure_file(output: 'config.h', configuration: config_data)
 
 public_includes = include_directories('include')
 
-libpng_dep = dependency(
-  'libpng',
-  native: native,
-  default_options: {'warning_level': '0', 'werror': 'false'}, # Suppress warnings from libpng
-)
+libpng_dep = dependency('libpng', native: native)
 
 clip_dep = declare_dependency(sources: files('source/libs/clip.c'))
 strings_dep = declare_dependency(sources: files('source/libs/strings.c'))
