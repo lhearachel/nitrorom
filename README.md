@@ -1,6 +1,6 @@
 # NitroROM
 
-Create Nintendo DS ROM images from a plain-text specification.
+Interface with Nintendo DS ROM images.
 
 ## Table of Contents
 
@@ -11,14 +11,20 @@ Create Nintendo DS ROM images from a plain-text specification.
 
 ## Background
 
-This project aims to provide a compliant reimplementation of the original
-tooling for building ROM images which shipped with the Nintendo DS SDK. The
-primary motivator for this work is to construct binary-matches of retail ROM
-images for community decompilation projects, but this tool can also of course be
-used for compiling homebrew software distributions. Producing binary-matches of
-existing ROMs is also potentially useful for modders and hackers, as it will
-reduce the size of distributable patch-files produced by delta-encoding formats
-like xDelta or BPS.
+NitroROM is a program for interfacing with Nintendo DS ROM-files in a variety of
+ways. Its primary aims are to provide a reusable tool-suite for developers,
+modders, hackers, and reverse-engineering researchers. This tool-suite is
+sub-divided into a set of commands which act as programs unto themselves; the
+top-level executable acts merely as an access-director to these programs.
+
+This project originally began as a packaging utility for building ROM-files with
+a similar strategy as that used by the original SDK-tooling. This implementation
+is thus able to construct binary-matches of retail ROM-files for decompilation
+projects and modders making patches of their outputs using a delta-encoding
+format, e.g., [`.xdelta`][gh-xdelta] or [`.bps`][gh-bps-spec].
+
+[gh-xdelta]: https://github.com/jmacd/xdelta
+[gh-bps-spec]: https://github.com/blakesmith/rombp/blob/master/docs/bps_spec.md
 
 ## Install
 
