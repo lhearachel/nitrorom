@@ -74,7 +74,8 @@ Developers and early-adopters can build the project from source:
     ```
 
 Optionally, distributable manual-pages can be generated from the plain-text
-files in `docs/`:
+files in `docs/`. An alias target is provided for convenience, e.g., if using
+the `ninja` backend for `meson`:
 
 ```sh
 ninja -C build docs
