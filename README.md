@@ -73,9 +73,27 @@ Developers and early-adopters can build the project from source:
     ./build/nitrorom
     ```
 
+Optionally, distributable manual-pages can be generated from the plain-text
+files in `docs/`:
+
+```sh
+ninja -C build docs
+```
+
+This requires setting up the project with the `manuals` option set to `true`,
+which must be specified when configuring the build:
+
+```sh
+meson setup -Dmanuals=true build
+```
+
+The generation targets use [`asciidoctor`][repology-asciidoctor] to convert the
+`.adoc` files into manual pages.
+
 [getting-meson]: https://mesonbuild.com/Getting-meson.html
 [repology-meson]: https://repology.org/project/meson/versions
 [repology-libpng]: https://repology.org/project/libpng/versions
+[repology-asciidoctor]: https://repology.org/project/asciidoctor/versions
 
 ## Usage
 

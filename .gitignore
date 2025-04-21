@@ -5,6 +5,7 @@
 # Build artifacts
 build/
 *.nds
+*.1
 
 # Developer conveniences
 testdir/

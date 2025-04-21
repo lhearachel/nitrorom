@@ -70,6 +70,9 @@ nitrorom_exe = executable(
 
 if not meson.is_subproject()
   subdir('tests')
+  if get_option('manuals')
+    subdir('docs')
+  endif
 else
   meson.override_find_program('nitrorom', nitrorom_exe)
 endif
