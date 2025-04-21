@@ -4,10 +4,16 @@ Thanks for your interest in contributing! This project is largely a solo-effort,
 but collaborative effort is always appreciated. ❤️
 
 Here, you'll find a loose set of guidelines for contributing to NitroROM. These
-are not *rules*; use your best judgment and feel free to propose changes to this
+are not _rules_; use your best judgment and feel free to propose changes to this
 document by way of a pull request.
 
 ## Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [How do I report a bug or a crash?](#how-do-i-report-a-bug-or-a-crash)
+- [How do I set up a development environment?](#how-do-i-set-up-a-development-environment)
+- [How do I run automated tests?](#how-do-i-run-automated-tests)
+- [How do I submit an enhancement / bugfix?](#how-do-i-submit-an-enhancement-bugfix)
 
 ## How do I report a bug or a crash?
 
@@ -61,7 +67,7 @@ Meson comes with a built-in test harness. Code for the drivers is stored in the
 by the `test_suites` dictionary in `tests/meson.build`, which maps module-suites
 to their driver and associated test cases.
 
-To *run* the full test-suite:
+To _run_ the full test-suite:
 
 ```sh
 meson test -C build
