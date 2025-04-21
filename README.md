@@ -31,17 +31,17 @@ Developers and early-adopters can build the project from source:
    instructions][getting-meson] or [your package manager][repology-meson].
 2. If you have not already, [install `libpng`][repology-libpng].
 
-    > [!WARNING]
-    > Developers working on MSYS2 will need to compile `libpng` from source;
-    > after downloading a source archive:
-    >
-    > ```bash
-    > tar xf libpng-<version>.tar.xz
-    > cd libpng-<version>
-    > ./configure --prefix=/usr
-    > make check
-    > make install
-    > ```
+> [!WARNING]
+> Developers working on MSYS2 will need to compile `libpng` from source;
+> after downloading a source archive:
+>
+> ```bash
+> tar xf libpng-<version>.tar.xz
+> cd libpng-<version>
+> ./configure --prefix=/usr
+> make check
+> make install
+> ```
 
 3. Clone the repository.
 4. Configure the project's build as you like using Meson:
