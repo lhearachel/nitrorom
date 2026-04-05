@@ -7,7 +7,6 @@ project(
   version: files('.version'),
   default_options: {
     'c_std': 'c99',
-    'c_args': '-Wno-unused-result',
     'buildtype': 'release',
     'warning_level': '2',
     'werror': 'true',
@@ -56,6 +55,7 @@ nitrorom_exe = executable(
     ),
     config_h,
   ],
+  c_args: ['-Wno-unused-result'],
   native: native,
   install: install,
   include_directories: public_includes,
