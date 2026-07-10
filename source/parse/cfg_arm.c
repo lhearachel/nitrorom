@@ -158,8 +158,8 @@ static cfgresult cfg_arm7_overlaytable(rompacker *packer, string val, long line)
 static cfgresult cfg_arm7_nef(rompacker *packer, string val, long line)
 {
     varsub(val, packer);
-    if (val.len < 4) configerr("nef path length is less than four characters")
-    else if (strncmp((char *)val.s + val.len - 4, ".nef", 4)) configerr("nef path does not end in .nef")
+    if (val.len < 4) configerr("nef path length is less than four characters");
+    else if (strncmp((char *)val.s + val.len - 4, ".nef", 4)) configerr("nef path does not end in .nef");
     
     string buf = {
         .s = malloc(val.len - 4 + sizeof("_defs.sbin")),
