@@ -16,6 +16,8 @@
 #include "libs/strings.h"
 #include "libs/vector.h"
 
+#define NEF_EXT_LEN ((long)sizeof(".nef") - 1)
+
 // NOTE: This performs an allocation that may *appear* to be left dangling, but we employ a trick:
 // The first element of the vector points to the beginning of the allocated region, so freeing the
 // first element's filename string will free the entire region.
@@ -123,6 +125,36 @@ static cfgresult cfg_arm9_overlaytable(rompacker *packer, string val, long line)
     return cfg_arm_prepfile(packer, &packer->ovt9, val, line, "arm9", "overlay table");
 }
 
+static cfgresult cfg_arm9_nef(rompacker *packer, string val, long line)
+{
+    varsub(val, packer);
+
+    if (val.len < NEF_EXT_LEN) configerr("nef path length is less than four characters");
+    const string stem = { .s = val.s + val.len - NEF_EXT_LEN, .len = NEF_EXT_LEN };
+    if (!strequ(stem, string(".nef"))) configerr("nef path does not end in .nef");
+
+    long len = val.len - NEF_EXT_LEN;
+
+    string buf = string(malloc(len + sizeof("_defs.sbin") - 1), len + (long)sizeof(".sbin") - 1);
+
+    memcpy(buf.s, val.s, len);
+    memcpy(buf.s + len, ".sbin", sizeof(".sbin") - 1);
+
+    cfgresult res = cfg_arm9_staticbinary(packer, buf, line);
+    if (res.code != 0) { goto error; }
+
+    // in case it clobbers the buffer, copy again.
+    memcpy(buf.s, val.s, len);
+    memcpy(buf.s + len, "_defs.sbin", sizeof("_defs.sbin") - 1);
+    buf.len = len + (long)sizeof("_defs.sbin") - 1;
+
+    res = cfg_arm9_definitions(packer, buf, line);
+
+error:
+    free(buf.s);
+    return res;
+}
+
 static cfgresult cfg_arm7_staticbinary(rompacker *packer, string val, long line)
 {
     return cfg_arm_prepfile(packer, &packer->arm7, val, line, "arm7", "static binary");
@@ -159,16 +191,13 @@ static cfgresult cfg_arm7_nef(rompacker *packer, string val, long line)
 {
     varsub(val, packer);
 
-    if (val.len < 4) configerr("nef path length is less than four characters");
-    else if (memcmp(val.s + val.len - (sizeof(".nef") - 1), ".nef", sizeof(".nef") - 1) != 0)
-        configerr("nef path does not end in .nef");
+    if (val.len < NEF_EXT_LEN) configerr("nef path length is less than four characters");
+    const string stem = { .s = val.s + val.len - NEF_EXT_LEN, .len = NEF_EXT_LEN };
+    if (!strequ(stem, string(".nef"))) configerr("nef path does not end in .nef");
 
-    long len = val.len - ((long)sizeof(".nef") - 1);
+    long len = val.len - NEF_EXT_LEN;
 
-    string buf = {
-        .s   = malloc(len + sizeof("_defs.sbin") - 1),
-        .len = len + (long)sizeof(".sbin") - 1,
-    };
+    string buf = string(malloc(len + sizeof("_defs.sbin") - 1), len + (long)sizeof(".sbin") - 1);
 
     memcpy(buf.s, val.s, len);
     memcpy(buf.s + len, ".sbin", sizeof(".sbin") - 1);
@@ -193,6 +222,7 @@ static const keyvalueparser kvparsers_arm9[] = {
     { .key = string("static-binary"), .parser = cfg_arm9_staticbinary },
     { .key = string("definitions"),   .parser = cfg_arm9_definitions  },
     { .key = string("overlay-table"), .parser = cfg_arm9_overlaytable },
+    { .key = string("nef"),           .parser = cfg_arm9_nef          },
     { .key = stringZ,                 .parser = NULL                  },
 };
 
