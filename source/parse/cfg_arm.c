@@ -160,24 +160,26 @@ static cfgresult cfg_arm7_nef(rompacker *packer, string val, long line)
     varsub(val, packer);
 
     if (val.len < 4) configerr("nef path length is less than four characters");
-    else if (strncmp((char *)val.s + val.len - 4, ".nef", 4) != 0)
+    else if (memcmp(val.s + val.len - sizeof(".nef") + 1, ".nef", 4) != 0)
         configerr("nef path does not end in .nef");
 
+    long len = val.len - ((long)sizeof(".nef") - 1);
+
     string buf = {
-        .s   = malloc(val.len - 4 + sizeof("_defs.sbin") + 1 + 1),
-        .len = val.len - 4 + (long)sizeof(".sbin"),
+        .s   = malloc(len + sizeof("_defs.sbin") - 1),
+        .len = len + (long)sizeof(".sbin") - 1,
     };
 
     memcpy(buf.s, val.s, val.len - 4);
-    memcpy((char *)buf.s + val.len - 4, ".sbin", sizeof(".sbin"));
+    memcpy(buf.s + len, ".sbin", sizeof(".sbin") - 1);
 
     cfgresult res = cfg_arm7_staticbinary(packer, buf, line);
     if (res.code != 0) { goto error; }
 
     // in case it clobbers the buffer, copy again.
-    memcpy(buf.s, val.s, val.len - 4);
-    memcpy((char *)buf.s + val.len - 4, "_defs.sbin", sizeof("_defs.sbin"));
-    buf.len = val.len - 4 + (long)sizeof("_defs.sbin");
+    memcpy(buf.s, val.s, val.len);
+    memcpy(buf.s + len, "_defs.sbin", sizeof("_defs.sbin") - 1);
+    buf.len = len + (long)sizeof("_defs.sbin") - 1;
 
     res = cfg_arm7_definitions(packer, buf, line);
 
