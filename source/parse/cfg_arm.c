@@ -155,6 +155,37 @@ static cfgresult cfg_arm7_overlaytable(rompacker *packer, string val, long line)
     return cfg_arm_prepfile(packer, &packer->ovt7, val, line, "arm7", "overlay table");
 }
 
+static cfgresult cfg_arm7_nef(rompacker *packer, string val, long line)
+{
+    varsub(val, packer);
+    if (val.len < 4) configerr("nef path length is less than four characters")
+    else if (strncmp((char *)val.s + val.len - 4, ".nef", 4)) configerr("nef path does not end in .nef")
+    
+    string buf = {
+        .s = malloc(val.len - 4 + sizeof("_defs.sbin")),
+        .len = val.len - 4 + sizeof(".sbin"),
+    };
+
+    memcpy(buf.s, val.s, val.len - 4);
+    memcpy(buf.s + val.len - 4, ".sbin", 5);
+
+    cfgresult res = cfg_arm7_staticbinary(packer, buf, line);
+    if (res.code != 0) {
+        goto error;
+    }
+
+    // in case it clobbers the buffer, copy again.
+    memcpy(buf.s, val.s, val.len - 4);
+    memcpy(buf.s + val.len - 4, "_defs.sbin", 10);
+    buf.len = val.len - 4 + sizeof("_defs.sbin");
+
+    res = cfg_arm7_definitions(packer, buf, line);
+
+error:
+    free(buf.s);
+    return res;
+}
+
 // clang-format off
 static const keyvalueparser kvparsers_arm9[] = {
     { .key = string("static-binary"), .parser = cfg_arm9_staticbinary },
@@ -167,6 +198,7 @@ static const keyvalueparser kvparsers_arm7[] = {
     { .key = string("static-binary"), .parser = cfg_arm7_staticbinary },
     { .key = string("definitions"),   .parser = cfg_arm7_definitions  },
     { .key = string("overlay-table"), .parser = cfg_arm7_overlaytable },
+    { .key = string("nef"),           .parser = cfg_arm7_nef          },
     { .key = stringZ,                 .parser = NULL                  },
 };
 // clang-format on
