@@ -16,7 +16,7 @@
 #include "libs/strings.h"
 #include "libs/vector.h"
 
-#define NEF_EXT_LEN ((long)sizeof(".nef") - 1)
+#define NEF_EXT_LEN lengthof(".nef")
 
 // NOTE: This performs an allocation that may *appear* to be left dangling, but we employ a trick:
 // The first element of the vector points to the beginning of the allocated region, so freeing the
@@ -130,29 +130,37 @@ static cfgresult cfg_arm9_nef(rompacker *packer, string val, long line)
     varsub(val, packer);
 
     if (val.len < NEF_EXT_LEN) configerr("nef path length is less than four characters");
+
     const string stem = { .s = val.s + val.len - NEF_EXT_LEN, .len = NEF_EXT_LEN };
     if (!strequ(stem, string(".nef"))) configerr("nef path does not end in .nef");
 
     long len = val.len - NEF_EXT_LEN;
 
-    string buf = string(malloc(len + sizeof("_defs.sbin") - 1), len + (long)sizeof(".sbin") - 1);
+    {
+        string buf = string(malloc(len + lengthof(".sbin")), len + lengthof(".sbin"));
 
-    memcpy(buf.s, val.s, len);
-    memcpy(buf.s + len, ".sbin", sizeof(".sbin") - 1);
+        memcpy(buf.s, val.s, len);
+        memcpy(buf.s + len, ".sbin", lengthof(".sbin"));
 
-    cfgresult res = cfg_arm9_staticbinary(packer, buf, line);
-    if (res.code != 0) { goto error; }
+        cfgresult res = cfg_arm9_staticbinary(packer, buf, line);
+        free(buf.s);
 
-    // in case it clobbers the buffer, copy again.
-    memcpy(buf.s, val.s, len);
-    memcpy(buf.s + len, "_defs.sbin", sizeof("_defs.sbin") - 1);
-    buf.len = len + (long)sizeof("_defs.sbin") - 1;
+        if (res.code != 0) return res;
+    }
 
-    res = cfg_arm9_definitions(packer, buf, line);
+    {
+        string buf = string(malloc(len + lengthof("_defs.sbin")), len + lengthof("_defs.sbin"));
 
-error:
-    free(buf.s);
-    return res;
+        memcpy(buf.s, val.s, len);
+        memcpy(buf.s + len, "_defs.sbin", lengthof("_defs.sbin"));
+
+        cfgresult res = cfg_arm9_definitions(packer, buf, line);
+        free(buf.s);
+
+        if (res.code != 0) return res;
+    }
+
+    return configok;
 }
 
 static cfgresult cfg_arm7_staticbinary(rompacker *packer, string val, long line)
@@ -192,29 +200,37 @@ static cfgresult cfg_arm7_nef(rompacker *packer, string val, long line)
     varsub(val, packer);
 
     if (val.len < NEF_EXT_LEN) configerr("nef path length is less than four characters");
+
     const string stem = { .s = val.s + val.len - NEF_EXT_LEN, .len = NEF_EXT_LEN };
     if (!strequ(stem, string(".nef"))) configerr("nef path does not end in .nef");
 
     long len = val.len - NEF_EXT_LEN;
 
-    string buf = string(malloc(len + sizeof("_defs.sbin") - 1), len + (long)sizeof(".sbin") - 1);
+    {
+        string buf = string(malloc(len + lengthof(".sbin")), len + lengthof(".sbin"));
 
-    memcpy(buf.s, val.s, len);
-    memcpy(buf.s + len, ".sbin", sizeof(".sbin") - 1);
+        memcpy(buf.s, val.s, len);
+        memcpy(buf.s + len, ".sbin", lengthof(".sbin"));
 
-    cfgresult res = cfg_arm7_staticbinary(packer, buf, line);
-    if (res.code != 0) { goto error; }
+        cfgresult res = cfg_arm7_staticbinary(packer, buf, line);
+        free(buf.s);
 
-    // in case it clobbers the buffer, copy again.
-    memcpy(buf.s, val.s, len);
-    memcpy(buf.s + len, "_defs.sbin", sizeof("_defs.sbin") - 1);
-    buf.len = len + (long)sizeof("_defs.sbin") - 1;
+        if (res.code != 0) return res;
+    }
 
-    res = cfg_arm7_definitions(packer, buf, line);
+    {
+        string buf = string(malloc(len + lengthof("_defs.sbin")), len + lengthof("_defs.sbin"));
 
-error:
-    free(buf.s);
-    return res;
+        memcpy(buf.s, val.s, len);
+        memcpy(buf.s + len, "_defs.sbin", lengthof("_defs.sbin"));
+
+        cfgresult res = cfg_arm7_definitions(packer, buf, line);
+        free(buf.s);
+
+        if (res.code != 0) return res;
+    }
+
+    return configok;
 }
 
 // clang-format off
