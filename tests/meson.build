@@ -1,6 +1,7 @@
 test_clip = executable(
   'test_clip',
   sources: files('test_clip.c'),
+  c_args: ['-Wno-unused-result'],
   include_directories: public_includes,
   dependencies: [clip_dep],
 )
@@ -8,6 +9,7 @@ test_clip = executable(
 test_config = executable(
   'test_config',
   sources: files('test_config.c'),
+  c_args: ['-Wno-unused-result'],
   include_directories: public_includes,
   dependencies: [config_dep],
 )
@@ -15,6 +17,7 @@ test_config = executable(
 test_sheets = executable(
   'test_sheets',
   sources: files('test_sheets.c'),
+  c_args: ['-Wno-unused-result'],
   include_directories: public_includes,
   dependencies: [sheets_dep],
 )
