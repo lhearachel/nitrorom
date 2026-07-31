@@ -14,3 +14,7 @@ compile_commands.json
 # Meson subprojects
 subprojects/libpng-*/
 subprojects/zlib-*/
+
+# Packaging
+dist
+nitrorom.tar.gz
